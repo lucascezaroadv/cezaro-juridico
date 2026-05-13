@@ -1,0 +1,568 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────
+// AUTH / USUÁRIOS
+// ─────────────────────────────────────────────
+
+model Usuario {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  nome      String
+  email     String   @unique
+  cargo     Cargo    @default(ADVOGADO)
+  avatar    String?
+  ativo     Boolean  @default(true)
+  criadoEm DateTime @default(now())
+
+  processos   Processo[]
+  tarefas     Tarefa[]
+  leads       Lead[]
+  comentarios Comentario[]
+
+  @@map("usuarios")
+}
+
+enum Cargo {
+  ADMIN
+  SOCIO
+  ADVOGADO
+  ESTAGIARIO
+  ADMINISTRATIVO
+}
+
+// ─────────────────────────────────────────────
+// CLIENTES
+// ─────────────────────────────────────────────
+
+model Cliente {
+  id            String      @id @default(cuid())
+  tipo          TipoCliente @default(PESSOA_FISICA)
+  nome          String
+  cpfCnpj       String?     @unique
+  email         String?
+  telefone      String?
+  whatsapp      String?
+  endereco      String?
+  cidade        String?
+  estado        String?
+  cep           String?
+  portalLogin   String?     @unique
+  portalSenha   String?
+  portalAtivo   Boolean     @default(false)
+  observacoes   String?
+  criadoEm     DateTime    @default(now())
+  atualizadoEm DateTime    @updatedAt
+
+  processos  Processo[]
+  documentos Documento[]
+  mensagens  MensagemPortal[]
+  contratos  Contrato[]
+  leads      Lead[]
+
+  @@map("clientes")
+}
+
+enum TipoCliente {
+  PESSOA_FISICA
+  PESSOA_JURIDICA
+}
+
+// ─────────────────────────────────────────────
+// PROCESSOS
+// ─────────────────────────────────────────────
+
+model Processo {
+  id                     String         @id @default(cuid())
+  numero                 String         @unique
+  numeroFormatado        String?
+  tribunal               String?
+  vara                   String?
+  comarca                String?
+  uf                     String?
+  assunto                String?
+  areaJuridica           AreaJuridica
+  fase                   FaseProcessual @default(CONHECIMENTO)
+  status                 StatusProcesso @default(ATIVO)
+  poloAtivo              String?
+  poloPassivo            String?
+  valorCausa             Float?
+  honorarios             Float?
+  percentualExito        Float?
+  dataDistribuicao       DateTime?
+  dataUltimaMovimentacao DateTime?
+  observacoes            String?
+  criadoEm              DateTime       @default(now())
+  atualizadoEm          DateTime       @updatedAt
+
+  clienteId  String
+  cliente    Cliente  @relation(fields: [clienteId], references: [id])
+  advogadoId String?
+  advogado   Usuario? @relation(fields: [advogadoId], references: [id])
+
+  movimentacoes Movimentacao[]
+  intimacoes    Intimacao[]
+  prazos        Prazo[]
+  tarefas       Tarefa[]
+  documentos    Documento[]
+  audiencias    Audiencia[]
+  diligencias   Diligencia[]
+
+  @@map("processos")
+}
+
+enum AreaJuridica {
+  TRABALHISTA
+  EMPRESARIAL
+  EXECUCAO_CREDITO
+  LGPD
+  CONSULTORIA
+  CONTRATOS
+  COMPLIANCE
+  CIVIL
+  TRIBUTARIO
+  PREVIDENCIARIO
+  OUTRO
+}
+
+enum FaseProcessual {
+  CONHECIMENTO
+  RECURSAL
+  EXECUCAO
+  CUMPRIMENTO_SENTENCA
+  ARQUIVADO
+}
+
+enum StatusProcesso {
+  ATIVO
+  SUSPENSO
+  ARQUIVADO
+  ENCERRADO
+}
+
+// ─────────────────────────────────────────────
+// MOVIMENTAÇÕES
+// ─────────────────────────────────────────────
+
+model Movimentacao {
+  id        String   @id @default(cuid())
+  data      DateTime
+  descricao String
+  tipo      String?
+  origem    String?  @default("MANUAL")
+  resumoIA  String?
+  criadoEm DateTime @default(now())
+
+  processoId String
+  processo   Processo @relation(fields: [processoId], references: [id])
+
+  @@map("movimentacoes")
+}
+
+// ─────────────────────────────────────────────
+// INTIMAÇÕES E PUBLICAÇÕES
+// ─────────────────────────────────────────────
+
+model Intimacao {
+  id             String          @id @default(cuid())
+  titulo         String
+  conteudo       String
+  dataPublicacao DateTime
+  dataLeitura    DateTime?
+  prazo          DateTime?
+  urgencia       NivelUrgencia   @default(NORMAL)
+  status         StatusIntimacao @default(PENDENTE)
+  fonte          String?
+  resumoIA       String?
+  sugestaoIA     String?
+  criadoEm      DateTime        @default(now())
+
+  processoId String?
+  processo   Processo?  @relation(fields: [processoId], references: [id])
+  tarefas    Tarefa[]
+  prazos     Prazo[]
+
+  @@map("intimacoes")
+}
+
+enum NivelUrgencia {
+  CRITICA
+  ALTA
+  NORMAL
+  BAIXA
+}
+
+enum StatusIntimacao {
+  PENDENTE
+  LIDA
+  PROCESSADA
+  ARQUIVADA
+}
+
+// ─────────────────────────────────────────────
+// PRAZOS E AGENDA
+// ─────────────────────────────────────────────
+
+model Prazo {
+  id             String      @id @default(cuid())
+  titulo         String
+  descricao      String?
+  dataVencimento DateTime
+  tipo           TipoPrazo   @default(PROCESSUAL)
+  status         StatusPrazo @default(PENDENTE)
+  criadoEm      DateTime    @default(now())
+
+  processoId  String?
+  processo    Processo?  @relation(fields: [processoId], references: [id])
+  intimacaoId String?
+  intimacao   Intimacao? @relation(fields: [intimacaoId], references: [id])
+
+  @@map("prazos")
+}
+
+enum TipoPrazo {
+  PROCESSUAL
+  ADMINISTRATIVO
+  CONTRATUAL
+  INTERNO
+}
+
+enum StatusPrazo {
+  PENDENTE
+  CONCLUIDO
+  VENCIDO
+  CANCELADO
+}
+
+model Audiencia {
+  id          String          @id @default(cuid())
+  tipo        String
+  data        DateTime
+  local       String?
+  link        String?
+  observacoes String?
+  status      StatusAudiencia @default(AGENDADA)
+  criadoEm   DateTime        @default(now())
+
+  processoId String
+  processo   Processo @relation(fields: [processoId], references: [id])
+
+  @@map("audiencias")
+}
+
+enum StatusAudiencia {
+  AGENDADA
+  REALIZADA
+  CANCELADA
+  ADIADA
+}
+
+// ─────────────────────────────────────────────
+// TAREFAS
+// ─────────────────────────────────────────────
+
+model Tarefa {
+  id           String       @id @default(cuid())
+  titulo       String
+  descricao    String?
+  prazo        DateTime?
+  prioridade   Prioridade   @default(MEDIA)
+  status       StatusTarefa @default(PENDENTE)
+  criadoEm    DateTime     @default(now())
+  concluidoEm DateTime?
+
+  processoId    String?
+  processo      Processo?  @relation(fields: [processoId], references: [id])
+  intimacaoId   String?
+  intimacao     Intimacao? @relation(fields: [intimacaoId], references: [id])
+  responsavelId String?
+  responsavel   Usuario?   @relation(fields: [responsavelId], references: [id])
+
+  @@map("tarefas")
+}
+
+enum Prioridade {
+  URGENTE
+  ALTA
+  MEDIA
+  BAIXA
+}
+
+enum StatusTarefa {
+  PENDENTE
+  EM_ANDAMENTO
+  CONCLUIDA
+  CANCELADA
+}
+
+// ─────────────────────────────────────────────
+// CRM — LEADS E FUNIL COMERCIAL
+// ─────────────────────────────────────────────
+
+model Lead {
+  id              String       @id @default(cuid())
+  nome            String
+  email           String?
+  telefone        String?
+  whatsapp        String?
+  origem          OrigemLead   @default(SITE)
+  areaJuridica    AreaJuridica?
+  urgencia        Prioridade   @default(MEDIA)
+  ticketPotencial Float?
+  etapa           EtapaCRM     @default(RECEBIDO)
+  status          StatusLead   @default(ATIVO)
+  observacoes     String?
+  criadoEm       DateTime     @default(now())
+  atualizadoEm   DateTime     @updatedAt
+
+  responsavelId String?
+  responsavel   Usuario? @relation(fields: [responsavelId], references: [id])
+  clienteId     String?
+  cliente       Cliente? @relation(fields: [clienteId], references: [id])
+
+  propostas   Proposta[]
+  comentarios Comentario[]
+
+  @@map("leads")
+}
+
+enum OrigemLead {
+  SITE
+  WHATSAPP
+  INDICACAO
+  INSTAGRAM
+  GOOGLE
+  LINKEDIN
+  OUTRO
+}
+
+enum EtapaCRM {
+  RECEBIDO
+  QUALIFICACAO
+  ATENDIMENTO_INICIAL
+  REUNIAO
+  PROPOSTA_ENVIADA
+  NEGOCIACAO
+  FECHADO
+  PERDIDO
+}
+
+enum StatusLead {
+  ATIVO
+  CONVERTIDO
+  PERDIDO
+  INATIVO
+}
+
+// ─────────────────────────────────────────────
+// PROPOSTAS DE HONORÁRIOS
+// ─────────────────────────────────────────────
+
+model Proposta {
+  id              String         @id @default(cuid())
+  titulo          String
+  conteudo        String?
+  honorarios      Float?
+  percentualExito Float?
+  parcelamento    Int?
+  status          StatusProposta @default(CRIADA)
+  linkPublico     String?        @unique
+  visualizadoEm  DateTime?
+  assinadoEm     DateTime?
+  criadoEm       DateTime       @default(now())
+  atualizadoEm   DateTime       @updatedAt
+
+  leadId   String?
+  lead     Lead?     @relation(fields: [leadId], references: [id])
+  contrato Contrato?
+
+  @@map("propostas")
+}
+
+enum StatusProposta {
+  CRIADA
+  ENVIADA
+  VISUALIZADA
+  NEGOCIANDO
+  APROVADA
+  RECUSADA
+  ASSINADA
+}
+
+// ─────────────────────────────────────────────
+// CONTRATOS
+// ─────────────────────────────────────────────
+
+model Contrato {
+  id          String         @id @default(cuid())
+  titulo      String
+  conteudo    String
+  status      StatusContrato @default(PENDENTE)
+  assinadoEm DateTime?
+  criadoEm   DateTime       @default(now())
+
+  propostaId String?   @unique
+  proposta   Proposta? @relation(fields: [propostaId], references: [id])
+  clienteId  String?
+  cliente    Cliente?  @relation(fields: [clienteId], references: [id])
+
+  @@map("contratos")
+}
+
+enum StatusContrato {
+  PENDENTE
+  ASSINADO
+  CANCELADO
+  VENCIDO
+}
+
+// ─────────────────────────────────────────────
+// EXECUÇÃO — DILIGÊNCIAS
+// ─────────────────────────────────────────────
+
+model Diligencia {
+  id          String              @id @default(cuid())
+  data        DateTime
+  tipo        TipoDiligencia
+  resultado   ResultadoDiligencia @default(PENDENTE)
+  observacoes String?
+  criadoEm   DateTime            @default(now())
+
+  processoId String
+  processo   Processo @relation(fields: [processoId], references: [id])
+
+  @@map("diligencias")
+}
+
+enum TipoDiligencia {
+  SISBAJUD
+  RENAJUD
+  INFOJUD
+  SNIPER
+  SERP
+  CNIB
+  CCS
+  IDPJ
+  PROTESTO
+  OUTRO
+}
+
+enum ResultadoDiligencia {
+  PENDENTE
+  POSITIVO
+  NEGATIVO
+  PARCIAL
+}
+
+// ─────────────────────────────────────────────
+// DOCUMENTOS
+// ─────────────────────────────────────────────
+
+model Documento {
+  id        String   @id @default(cuid())
+  nome      String
+  tipo      String?
+  url       String
+  tamanho   Int?
+  mimeType  String?
+  categoria String?
+  descricao String?
+  criadoEm DateTime @default(now())
+
+  processoId String?
+  processo   Processo? @relation(fields: [processoId], references: [id])
+  clienteId  String?
+  cliente    Cliente?  @relation(fields: [clienteId], references: [id])
+
+  @@map("documentos")
+}
+
+// ─────────────────────────────────────────────
+// FINANCEIRO
+// ─────────────────────────────────────────────
+
+model LancamentoFinanceiro {
+  id          String           @id @default(cuid())
+  descricao   String
+  valor       Float
+  tipo        TipoLancamento
+  categoria   String?
+  status      StatusFinanceiro @default(PENDENTE)
+  vencimento  DateTime?
+  pagamento   DateTime?
+  criadoEm   DateTime         @default(now())
+
+  @@map("lancamentos_financeiros")
+}
+
+enum TipoLancamento {
+  RECEITA
+  DESPESA
+}
+
+enum StatusFinanceiro {
+  PENDENTE
+  PAGO
+  VENCIDO
+  CANCELADO
+}
+
+// ─────────────────────────────────────────────
+// PORTAL DO CLIENTE — MENSAGENS
+// ─────────────────────────────────────────────
+
+model MensagemPortal {
+  id        String   @id @default(cuid())
+  conteudo  String
+  lida      Boolean  @default(false)
+  remetente String   @default("CLIENTE")
+  criadoEm DateTime @default(now())
+
+  clienteId String
+  cliente   Cliente @relation(fields: [clienteId], references: [id])
+
+  @@map("mensagens_portal")
+}
+
+// ─────────────────────────────────────────────
+// BLOG
+// ─────────────────────────────────────────────
+
+model Artigo {
+  id          String   @id @default(cuid())
+  titulo      String
+  slug        String   @unique
+  resumo      String?
+  conteudo    String
+  categoria   String?
+  tags        String[]
+  imagemCapa  String?
+  publicado   Boolean  @default(false)
+  geradoIA    Boolean  @default(false)
+  criadoEm   DateTime @default(now())
+  publicadoEm DateTime?
+
+  @@map("artigos")
+}
+
+// ─────────────────────────────────────────────
+// COMENTÁRIOS CRM
+// ─────────────────────────────────────────────
+
+model Comentario {
+  id        String   @id @default(cuid())
+  conteudo  String
+  criadoEm DateTime @default(now())
+
+  autorId String
+  autor   Usuario @relation(fields: [autorId], references: [id])
+  leadId  String?
+  lead    Lead?   @relation(fields: [leadId], references: [id])
+
+  @@map("comentarios")
+}
