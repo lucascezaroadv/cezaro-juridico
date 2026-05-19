@@ -150,42 +150,47 @@ export default async function AreaDetalhe({ params }: { params: Promise<{ slug: 
   if (!area) notFound();
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-white min-h-screen font-[family-name:var(--font-lato)]">
       {/* Hero */}
-      <section className="py-16 px-4" style={{ backgroundColor: area.cor + "15" }}>
-        <div className="max-w-4xl mx-auto">
-          <Link href="/areas-de-atuacao" className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-800 mb-6 transition-colors">
+      <section className="bg-[#8B1A1A] pt-32 pb-16 px-4 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.03]"
+          style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "32px 32px" }}
+        />
+        <div className="max-w-4xl mx-auto relative">
+          <Link href="/areas-de-atuacao" className="inline-flex items-center gap-1.5 text-xs text-white/50 hover:text-white mb-6 transition-colors">
             <ArrowLeft size={13} />
             Todas as áreas
           </Link>
-          <div className="inline-block text-xs font-bold px-3 py-1.5 rounded-full mb-4 text-white" style={{ backgroundColor: area.cor }}>
+          <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-white/60 uppercase tracking-[0.3em] mb-4">
+            <span className="w-1.5 h-1.5 rounded-full bg-white/60" />
             Área de Atuação
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{area.titulo}</h1>
-          <p className="text-base text-gray-600 max-w-xl leading-relaxed">{area.resumo}</p>
+          <h1 className="font-[family-name:var(--font-cormorant)] text-4xl md:text-5xl text-white font-bold mb-4">{area.titulo}</h1>
+          <div className="h-px w-10 bg-white/30 mb-5" />
+          <p className="text-white/65 text-base max-w-xl leading-relaxed">{area.resumo}</p>
         </div>
       </section>
 
-      <div className="max-w-4xl mx-auto px-4 py-12">
+      <div className="max-w-4xl mx-auto px-4 py-16">
         <div className="grid md:grid-cols-3 gap-10">
           {/* Conteúdo principal */}
-          <div className="md:col-span-2 space-y-8">
+          <div className="md:col-span-2 space-y-10">
             <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Como Atuamos</h2>
+              <h2 className="font-[family-name:var(--font-cormorant)] text-2xl text-[#1A0A0A] font-bold mb-5">Como Atuamos</h2>
               <div className="space-y-4">
                 {area.descricao.map((p, i) => (
-                  <p key={i} className="text-sm text-gray-600 leading-relaxed">{p}</p>
+                  <p key={i} className="text-sm text-[#3D2020]/65 leading-relaxed">{p}</p>
                 ))}
               </div>
             </div>
 
             <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-5">Serviços Prestados</h2>
+              <h2 className="font-[family-name:var(--font-cormorant)] text-2xl text-[#1A0A0A] font-bold mb-5">Serviços Prestados</h2>
               <div className="grid sm:grid-cols-2 gap-3">
-                {area.servicos.map(s => (
-                  <div key={s} className="flex items-start gap-2.5 p-3 bg-gray-50 rounded-xl">
-                    <CheckCircle size={14} className="mt-0.5 shrink-0" style={{ color: area.cor }} />
-                    <span className="text-xs text-gray-700 leading-relaxed">{s}</span>
+                {area.servicos.map((s) => (
+                  <div key={s} className="flex items-start gap-3 p-4 bg-[#F8F6F4] border border-gray-100 hover:border-[#8B1A1A]/25 transition-colors">
+                    <CheckCircle size={14} className="mt-0.5 shrink-0 text-[#8B1A1A]" />
+                    <span className="text-xs text-[#3D2020]/70 leading-relaxed">{s}</span>
                   </div>
                 ))}
               </div>
@@ -193,28 +198,27 @@ export default async function AreaDetalhe({ params }: { params: Promise<{ slug: 
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
-            <div className="bg-[#060d1a] rounded-2xl p-6">
-              <h3 className="text-sm font-bold text-white mb-4">Nossos Diferenciais</h3>
+          <div className="space-y-5">
+            <div className="bg-[#8B1A1A] p-6">
+              <h3 className="font-[family-name:var(--font-cormorant)] text-lg text-white font-bold mb-5">Nossos Diferenciais</h3>
               <ul className="space-y-3">
-                {area.diferenciais.map(d => (
-                  <li key={d} className="flex items-start gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: area.cor }} />
+                {area.diferenciais.map((d) => (
+                  <li key={d} className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white/50 mt-1.5 shrink-0" />
                     <span className="text-xs text-white/70 leading-relaxed">{d}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="border-2 rounded-2xl p-6 text-center" style={{ borderColor: area.cor + "40" }}>
-              <h3 className="text-sm font-bold text-gray-900 mb-2">Precisa de ajuda?</h3>
-              <p className="text-xs text-gray-500 mb-4 leading-relaxed">
+            <div className="border border-gray-100 p-6 text-center bg-[#F8F6F4]">
+              <h3 className="font-[family-name:var(--font-cormorant)] text-xl text-[#1A0A0A] font-bold mb-2">Precisa de ajuda?</h3>
+              <p className="text-xs text-[#3D2020]/55 mb-5 leading-relaxed">
                 Agende uma consulta e descubra como podemos resolver o seu caso.
               </p>
               <Link
                 href="/contato"
-                className="block w-full py-3 text-xs font-bold text-white rounded-xl transition-colors mb-2"
-                style={{ backgroundColor: area.cor }}
+                className="block w-full py-3 text-xs font-bold text-white bg-[#8B1A1A] hover:bg-[#6B1010] transition-colors mb-2.5"
               >
                 Falar com especialista
               </Link>
@@ -222,7 +226,7 @@ export default async function AreaDetalhe({ params }: { params: Promise<{ slug: 
                 href="https://wa.me/5500000000000"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full py-3 text-xs font-medium border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-center gap-2 w-full py-3 text-xs font-medium bg-[#25D366] hover:bg-[#20BA5A] text-white transition-colors"
               >
                 <MessageCircle size={13} />
                 WhatsApp

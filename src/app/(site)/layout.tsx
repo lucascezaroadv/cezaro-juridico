@@ -1,20 +1,6 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Lato } from "next/font/google";
 import SiteNav from "@/components/layout/SiteNav";
 import SiteFooter from "@/components/layout/SiteFooter";
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-playfair",
-  display: "swap",
-});
-
-const lato = Lato({
-  subsets: ["latin"],
-  weight: ["300", "400", "700", "900"],
-  variable: "--font-lato",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "Cezaro Costa Advocacia e Consultoria Jurídica",
@@ -24,7 +10,14 @@ export const metadata: Metadata = {
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`${playfair.variable} ${lato.variable}`}>
+    <div>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+      <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@300;400;700;900&display=swap"
+        rel="stylesheet"
+      />
       <SiteNav />
       <main>{children}</main>
       <SiteFooter />

@@ -1,15 +1,20 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaNeon } from "@prisma/adapter-neon";
-import { neonConfig } from "@neondatabase/serverless";
-import ws from "ws";
-
-// Necessário para o driver WebSocket do Neon funcionar no Node.js (Vercel serverless)
-neonConfig.webSocketConstructor = ws;
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 
 function createPrismaClient() {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) throw new Error("DATABASE_URL não definida");
-  const adapter = new PrismaNeon({ connectionString });
+
+  const pool = new Pool({
+    connectionString,
+    ssl: { rejectUnauthorized: false },
+    max: 1,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 15000,
+  });
+
+  const adapter = new PrismaPg(pool);
   return new PrismaClient({ adapter } as ConstructorParameters<typeof PrismaClient>[0]);
 }
 

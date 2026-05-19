@@ -2,6 +2,12 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* Fontes do site institucional (carregadas via <link> no layout do site) */
+:root {
+  --font-cormorant: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-lato: 'Lato', system-ui, -apple-system, sans-serif;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

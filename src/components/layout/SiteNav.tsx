@@ -2,15 +2,51 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X, Scale } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
-  { href: "/sobre", label: "O Escritório" },
+  { href: "/", label: "Início" },
+  { href: "/sobre", label: "Sobre" },
   { href: "/areas-de-atuacao", label: "Áreas de Atuação" },
-  { href: "/blog", label: "Blog Jurídico" },
+  { href: "/blog", label: "Blog" },
   { href: "/contato", label: "Contato" },
 ];
+
+// Balança SVG artística - traço fino
+function ScaleSVG({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      {/* Haste central */}
+      <line x1="24" y1="6" x2="24" y2="42" />
+      {/* Base */}
+      <line x1="16" y1="42" x2="32" y2="42" />
+      {/* Viga horizontal */}
+      <line x1="8" y1="14" x2="40" y2="14" />
+      {/* Correntes esquerda */}
+      <line x1="10" y1="14" x2="8" y2="22" />
+      <line x1="10" y1="22" x2="6" y2="22" />
+      {/* Prato esquerdo */}
+      <path d="M4 22 Q6 28 12 28 Q18 28 20 22" />
+      {/* Correntes direita */}
+      <line x1="38" y1="14" x2="40" y2="22" />
+      <line x1="40" y1="22" x2="44" y2="22" />
+      {/* Prato direito */}
+      <path d="M28 22 Q30 28 36 28 Q42 28 44 22" />
+      {/* Detalhe topo */}
+      <circle cx="24" cy="6" r="1.5" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
 
 export default function SiteNav() {
   const [open, setOpen] = useState(false);
@@ -27,52 +63,50 @@ export default function SiteNav() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
         scrolled
-          ? "bg-[#060d1a]/95 backdrop-blur-md border-b border-[#c9a84c]/20 py-3"
-          : "bg-transparent py-6"
+          ? "bg-white/97 backdrop-blur-md shadow-sm border-b border-gray-100 py-3"
+          : "bg-white py-5"
       )}
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-9 h-9 rounded-full border border-[#c9a84c] flex items-center justify-center group-hover:bg-[#c9a84c]/10 transition-colors">
-            <Scale className="w-4 h-4 text-[#c9a84c]" />
-          </div>
+          <ScaleSVG className="w-9 h-9 text-[#8B1A1A] group-hover:text-[#6B1010] transition-colors" />
           <div className="leading-tight">
-            <div className="font-[family-name:var(--font-playfair)] text-white text-sm font-bold tracking-wide">
-              CEZARO COSTA
+            <div className="font-[family-name:var(--font-cormorant)] text-[#1A0A0A] text-base font-bold tracking-widest uppercase">
+              Cezaro Costa
             </div>
-            <div className="text-[#c9a84c] text-[10px] tracking-[0.2em] uppercase font-[family-name:var(--font-lato)]">
+            <div className="text-[#8B1A1A] text-[9px] tracking-[0.25em] uppercase font-[family-name:var(--font-lato)] font-medium">
               Advocacia & Consultoria
             </div>
           </div>
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-7">
           {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
-              className="text-white/70 hover:text-[#c9a84c] text-sm tracking-wide font-[family-name:var(--font-lato)] transition-colors duration-200 relative group"
+              className="text-[#3D2020]/70 hover:text-[#8B1A1A] text-sm tracking-wide font-[family-name:var(--font-lato)] transition-colors duration-200 relative group"
             >
               {l.label}
-              <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-[#c9a84c] group-hover:w-full transition-all duration-300" />
+              <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-[#8B1A1A] group-hover:w-full transition-all duration-300" />
             </Link>
           ))}
           <a
             href="https://wa.me/5500000000000"
             target="_blank"
             rel="noopener noreferrer"
-            className="ml-4 px-5 py-2.5 bg-[#c9a84c] hover:bg-[#d4b85a] text-[#060d1a] text-sm font-bold tracking-wide font-[family-name:var(--font-lato)] rounded transition-colors duration-200"
+            className="ml-2 px-5 py-2.5 bg-[#8B1A1A] hover:bg-[#6B1010] text-white text-sm font-bold tracking-wide font-[family-name:var(--font-lato)] transition-colors duration-200"
           >
             Fale Conosco
           </a>
         </nav>
 
-        {/* Mobile */}
+        {/* Mobile toggle */}
         <button
           onClick={() => setOpen(!open)}
-          className="md:hidden text-white hover:text-[#c9a84c] transition-colors"
+          className="md:hidden text-[#1A0A0A] hover:text-[#8B1A1A] transition-colors"
           aria-label="Menu"
         >
           {open ? <X size={24} /> : <Menu size={24} />}
@@ -81,13 +115,13 @@ export default function SiteNav() {
 
       {/* Mobile Menu */}
       {open && (
-        <div className="md:hidden bg-[#060d1a]/98 backdrop-blur-xl border-t border-[#c9a84c]/20 px-6 py-6 flex flex-col gap-5">
+        <div className="md:hidden bg-white border-t border-gray-100 shadow-lg px-6 py-6 flex flex-col gap-5">
           {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
-              className="text-white/80 hover:text-[#c9a84c] font-[family-name:var(--font-lato)] text-base tracking-wide transition-colors"
+              className="text-[#3D2020]/80 hover:text-[#8B1A1A] font-[family-name:var(--font-lato)] text-base tracking-wide transition-colors border-b border-gray-50 pb-3"
             >
               {l.label}
             </Link>
@@ -96,7 +130,7 @@ export default function SiteNav() {
             href="https://wa.me/5500000000000"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-2 px-5 py-3 bg-[#c9a84c] text-[#060d1a] text-sm font-bold text-center rounded font-[family-name:var(--font-lato)]"
+            className="mt-1 px-5 py-3.5 bg-[#8B1A1A] text-white text-sm font-bold text-center font-[family-name:var(--font-lato)] tracking-wide"
           >
             Fale Conosco no WhatsApp
           </a>
