@@ -1,4 +1,5 @@
 import Link from "next/link";
+import LogoCezaro from "@/components/ui/LogoCezaro";
 import {
   ArrowRight,
   Briefcase,
@@ -17,70 +18,6 @@ import {
   Phone,
 } from "lucide-react";
 
-// Balança SVG artística grande para o hero
-function HeroScaleSVG() {
-  return (
-    <svg
-      viewBox="0 0 200 200"
-      fill="none"
-      stroke="white"
-      strokeWidth="1.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="w-full h-full opacity-20"
-      aria-hidden="true"
-    >
-      {/* Haste central */}
-      <line x1="100" y1="20" x2="100" y2="175" />
-      {/* Base */}
-      <line x1="70" y1="175" x2="130" y2="175" />
-      <line x1="60" y1="182" x2="140" y2="182" />
-      {/* Viga horizontal */}
-      <line x1="28" y1="55" x2="172" y2="55" />
-      {/* Correntes esquerda */}
-      <line x1="38" y1="55" x2="32" y2="78" />
-      <line x1="28" y1="78" x2="42" y2="78" />
-      {/* Prato esquerdo */}
-      <path d="M16 78 Q26 100 50 100 Q74 100 84 78" />
-      {/* Correntes direita */}
-      <line x1="162" y1="55" x2="168" y2="78" />
-      <line x1="158" y1="78" x2="172" y2="78" />
-      {/* Prato direito */}
-      <path d="M116 78 Q126 100 150 100 Q174 100 184 78" />
-      {/* Detalhe topo */}
-      <circle cx="100" cy="20" r="5" fill="white" stroke="none" opacity="0.4" />
-      {/* Setas de equilíbrio */}
-      <path d="M88 45 L100 35 L112 45" opacity="0.4" />
-    </svg>
-  );
-}
-
-// Balança SVG pequena para seções
-function ScaleSVGSmall({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 48 48"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
-      <line x1="24" y1="6" x2="24" y2="42" />
-      <line x1="16" y1="42" x2="32" y2="42" />
-      <line x1="8" y1="14" x2="40" y2="14" />
-      <line x1="10" y1="14" x2="8" y2="22" />
-      <line x1="10" y1="22" x2="6" y2="22" />
-      <path d="M4 22 Q6 28 12 28 Q18 28 20 22" />
-      <line x1="38" y1="14" x2="40" y2="22" />
-      <line x1="40" y1="22" x2="44" y2="22" />
-      <path d="M28 22 Q30 28 36 28 Q42 28 44 22" />
-      <circle cx="24" cy="6" r="1.5" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
 
 const areas = [
   {
@@ -197,7 +134,7 @@ export default function HomePage() {
         {/* Balança grande decorativa */}
         <div className="absolute right-0 top-0 bottom-0 w-1/2 flex items-center justify-center pointer-events-none">
           <div className="w-[520px] h-[520px] max-w-full">
-            <HeroScaleSVG />
+            <LogoCezaro variant="white" layout="stacked" scaleSize={340} className="opacity-90" />
           </div>
         </div>
 
@@ -306,7 +243,7 @@ export default function HomePage() {
           <div className="bg-[#8B1A1A] p-10 relative overflow-hidden">
             {/* Decoração */}
             <div className="absolute top-0 right-0 w-32 h-32 opacity-10">
-              <ScaleSVGSmall className="w-full h-full text-white" />
+              <LogoCezaro variant="white" layout="mark-only" scaleSize={120} />
             </div>
             <h3 className="font-[family-name:var(--font-cormorant)] text-2xl text-white font-bold mb-8">
               Por que escolher a Cezaro Costa?
@@ -396,10 +333,10 @@ export default function HomePage() {
       <section className="py-28 bg-[#8B1A1A] relative overflow-hidden">
         {/* Decoração fundo */}
         <div className="absolute right-[-60px] top-[-60px] opacity-[0.07] pointer-events-none">
-          <ScaleSVGSmall className="w-80 h-80 text-white" />
+          <LogoCezaro variant="white" layout="mark-only" scaleSize={200} className="opacity-15" />
         </div>
         <div className="absolute left-[-60px] bottom-[-60px] opacity-[0.05] pointer-events-none rotate-180">
-          <ScaleSVGSmall className="w-80 h-80 text-white" />
+          <LogoCezaro variant="white" layout="mark-only" scaleSize={200} className="opacity-15" />
         </div>
 
         <div className="relative max-w-7xl mx-auto px-6">
@@ -506,7 +443,7 @@ export default function HomePage() {
           }}
         />
         <div className="relative max-w-4xl mx-auto px-6 text-center">
-          <ScaleSVGSmall className="w-14 h-14 text-white/40 mx-auto mb-8" />
+          <div className="mx-auto mb-8 opacity-40"><LogoCezaro variant="white" layout="mark-only" scaleSize={56} /></div>
 
           <h2 className="font-[family-name:var(--font-cormorant)] text-4xl md:text-5xl text-white font-bold mb-5">
             Agende sua Consulta

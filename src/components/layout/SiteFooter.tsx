@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Phone, Mail, MapPin } from "lucide-react";
+import LogoCezaro from "@/components/ui/LogoCezaro";
 
 function InstagramIcon({ size = 15 }: { size?: number }) {
   return (
@@ -23,32 +24,6 @@ function FacebookIcon({ size = 15 }: { size?: number }) {
   );
 }
 
-// Balança SVG
-function ScaleSVG({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 48 48"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
-      <line x1="24" y1="6" x2="24" y2="42" />
-      <line x1="16" y1="42" x2="32" y2="42" />
-      <line x1="8" y1="14" x2="40" y2="14" />
-      <line x1="10" y1="14" x2="8" y2="22" />
-      <line x1="10" y1="22" x2="6" y2="22" />
-      <path d="M4 22 Q6 28 12 28 Q18 28 20 22" />
-      <line x1="38" y1="14" x2="40" y2="22" />
-      <line x1="40" y1="22" x2="44" y2="22" />
-      <path d="M28 22 Q30 28 36 28 Q42 28 44 22" />
-      <circle cx="24" cy="6" r="1.5" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
 
 const areas = [
   { label: "Direito do Trabalho", href: "/areas-de-atuacao/trabalhista" },
@@ -75,16 +50,8 @@ export default function SiteFooter() {
       <div className="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-12 gap-10">
         {/* Brand */}
         <div className="md:col-span-4">
-          <Link href="/" className="flex items-center gap-3 group mb-6">
-            <ScaleSVG className="w-9 h-9 text-[#8B1A1A] group-hover:text-[#A52020] transition-colors" />
-            <div>
-              <div className="font-[family-name:var(--font-cormorant)] text-white text-base font-bold tracking-widest uppercase">
-                Cezaro Costa
-              </div>
-              <div className="text-white/40 text-[9px] tracking-[0.25em] uppercase font-[family-name:var(--font-lato)]">
-                Advocacia & Consultoria
-              </div>
-            </div>
+          <Link href="/" className="inline-block mb-6">
+            <LogoCezaro variant="white" layout="horizontal" scaleSize={48} />
           </Link>
 
           <p className="text-white/45 text-sm leading-relaxed font-[family-name:var(--font-lato)] mb-6 max-w-xs">
