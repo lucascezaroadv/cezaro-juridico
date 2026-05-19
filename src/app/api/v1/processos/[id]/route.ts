@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { apiAuth } from "@/shared/auth/api-auth";
 import { prisma } from "@/shared/database/prisma";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  const { userId, error } = await apiAuth();
+  if (error) return error;
 
   const { id } = await params;
 
@@ -28,23 +28,28 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 }
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  const { userId, error } = await apiAuth();
+  if (error) return error;
 
   const { id } = await params;
-  const body = await request.json();
+  try {
+    const body = await request.json();
+    // Remove campos de relação que não podem ser atualizados diretamente
+    const { cliente, advogado, movimentacoes, intimacoes, prazos, tarefas, audiencias, diligencias, documentos, ...data } = body;
+    // Remove strings vazias
+    const clean = Object.fromEntries(Object.entries(data).filter(([, v]) => v !== ""));
 
-  const processo = await prisma.processo.update({
-    where: { id },
-    data: body,
-  });
-
-  return NextResponse.json(processo);
+    const processo = await prisma.processo.update({ where: { id }, data: clean });
+    return NextResponse.json(processo);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  const { userId, error } = await apiAuth();
+  if (error) return error;
 
   const { id } = await params;
   await prisma.processo.update({ where: { id }, data: { status: "ARQUIVADO" } });

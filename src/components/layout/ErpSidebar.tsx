@@ -2,28 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import {
-  LayoutDashboard,
-  FolderOpen,
-  Users,
-  Bell,
-  CalendarDays,
-  Megaphone,
-  Zap,
-  DollarSign,
-  FileArchive,
-  Settings,
-  Scale,
-  ChevronRight,
+  LayoutDashboard, FolderOpen, Users, Bell, CalendarDays,
+  Megaphone, Zap, DollarSign, FileArchive, Settings, Scale,
+  ChevronRight, BrainCircuit, Menu, X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navGroups = [
   {
     label: "Principal",
-    items: [
-      { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    ],
+    items: [{ href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" }],
   },
   {
     label: "Jurídico",
@@ -36,9 +26,7 @@ const navGroups = [
   },
   {
     label: "Comercial",
-    items: [
-      { href: "/crm", icon: Megaphone, label: "CRM / Funil" },
-    ],
+    items: [{ href: "/crm", icon: Megaphone, label: "CRM / Funil" }],
   },
   {
     label: "Estratégico",
@@ -48,16 +36,19 @@ const navGroups = [
       { href: "/documentos", icon: FileArchive, label: "Documentos" },
     ],
   },
+  {
+    label: "Inteligência Artificial",
+    items: [{ href: "/assistente", icon: BrainCircuit, label: "Assistente Jurídico" }],
+  },
 ];
 
-export default function ErpSidebar() {
+function SidebarContent({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
-
   return (
-    <aside className="w-60 bg-[#060d1a] flex flex-col h-full shrink-0">
+    <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="px-5 py-5 border-b border-white/5">
-        <Link href="/dashboard" className="flex items-center gap-2.5">
+      <div className="px-5 py-5 border-b border-white/5 flex items-center justify-between">
+        <Link href="/dashboard" className="flex items-center gap-2.5" onClick={onClose}>
           <div className="w-8 h-8 rounded-lg bg-[#c9a84c]/10 border border-[#c9a84c]/30 flex items-center justify-center">
             <Scale size={15} className="text-[#c9a84c]" />
           </div>
@@ -66,6 +57,11 @@ export default function ErpSidebar() {
             <div className="text-white/30 text-[9px] tracking-widest uppercase">Sistema Jurídico</div>
           </div>
         </Link>
+        {onClose && (
+          <button onClick={onClose} className="text-white/40 hover:text-white/80 transition-colors p-1">
+            <X size={18} />
+          </button>
+        )}
       </div>
 
       {/* Nav */}
@@ -83,6 +79,7 @@ export default function ErpSidebar() {
                   <li key={item.href}>
                     <Link
                       href={item.href}
+                      onClick={onClose}
                       className={cn(
                         "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 group",
                         active
@@ -106,12 +103,51 @@ export default function ErpSidebar() {
       <div className="px-3 py-3 border-t border-white/5">
         <Link
           href="/configuracoes"
+          onClick={onClose}
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/40 hover:text-white/70 hover:bg-white/5 transition-all"
         >
           <Settings size={16} />
           Configurações
         </Link>
       </div>
-    </aside>
+    </div>
+  );
+}
+
+export default function ErpSidebar() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex w-60 bg-[#060d1a] flex-col h-full shrink-0">
+        <SidebarContent />
+      </aside>
+
+      {/* Mobile: hamburger trigger (rendered inside header via portal-less approach — exposed via data attr) */}
+      <button
+        id="sidebar-mobile-trigger"
+        onClick={() => setMobileOpen(true)}
+        className="md:hidden fixed top-3.5 left-4 z-50 p-2 bg-[#060d1a] text-white rounded-lg shadow-md"
+        aria-label="Abrir menu"
+      >
+        <Menu size={20} />
+      </button>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-0 z-50 flex">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setMobileOpen(false)}
+          />
+          {/* Drawer */}
+          <aside className="relative w-72 max-w-[85vw] bg-[#060d1a] flex flex-col h-full shadow-2xl">
+            <SidebarContent onClose={() => setMobileOpen(false)} />
+          </aside>
+        </div>
+      )}
+    </>
   );
 }

@@ -108,18 +108,41 @@ export default function ProcessoDetailPage({ params }: { params: Promise<{ id: s
           {/* Partes */}
           <div className="bg-white rounded-xl border border-gray-100 p-5">
             <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-4">Partes</h3>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {processo.poloAtivo && (
                 <div>
-                  <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide">Polo Ativo</span>
-                  <p className="text-sm text-gray-800 mt-0.5">{processo.poloAtivo}</p>
+                  <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide flex items-center gap-1 mb-2">
+                    <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
+                    Polo Ativo
+                  </span>
+                  <div className="space-y-1">
+                    {processo.poloAtivo.split(" | ").filter(Boolean).map((parte, i) => (
+                      <div key={i} className="flex items-center gap-2 px-2.5 py-1.5 bg-blue-50 rounded-lg">
+                        <span className="text-[9px] font-bold text-blue-400 w-4 text-center">{i + 1}</span>
+                        <span className="text-xs text-blue-900 font-medium">{parte}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
               {processo.poloPassivo && (
                 <div>
-                  <span className="text-[10px] font-bold text-red-600 uppercase tracking-wide">Polo Passivo</span>
-                  <p className="text-sm text-gray-800 mt-0.5">{processo.poloPassivo}</p>
+                  <span className="text-[10px] font-bold text-red-600 uppercase tracking-wide flex items-center gap-1 mb-2">
+                    <span className="w-2 h-2 rounded-full bg-red-500 inline-block" />
+                    Polo Passivo
+                  </span>
+                  <div className="space-y-1">
+                    {processo.poloPassivo.split(" | ").filter(Boolean).map((parte, i) => (
+                      <div key={i} className="flex items-center gap-2 px-2.5 py-1.5 bg-red-50 rounded-lg">
+                        <span className="text-[9px] font-bold text-red-400 w-4 text-center">{i + 1}</span>
+                        <span className="text-xs text-red-900 font-medium">{parte}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+              )}
+              {!processo.poloAtivo && !processo.poloPassivo && (
+                <p className="text-xs text-gray-400 text-center py-2">Nenhuma parte cadastrada.</p>
               )}
             </div>
           </div>

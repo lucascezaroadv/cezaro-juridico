@@ -1,14 +1,106 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Plus, X, User, Building2 } from "lucide-react";
 import Link from "next/link";
 import { AREA_JURIDICA_LABELS } from "@/shared/types";
+
+// ── Componente de múltiplas partes ─────────────────────────────────────────────
+function PartesInput({
+  label, polo, value, onChange,
+}: {
+  label: string;
+  polo: "ativo" | "passivo";
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const cor = polo === "ativo" ? "text-blue-600 bg-blue-50 border-blue-200" : "text-red-600 bg-red-50 border-red-200";
+  const corBtn = polo === "ativo" ? "bg-blue-600 hover:bg-blue-700" : "bg-red-600 hover:bg-red-700";
+  const Icon = polo === "ativo" ? User : Building2;
+
+  const partes = value ? value.split(" | ").filter(Boolean) : [];
+  const [novo, setNovo] = useState("");
+
+  const adicionar = () => {
+    const nome = novo.trim();
+    if (!nome) return;
+    const novas = [...partes, nome];
+    onChange(novas.join(" | "));
+    setNovo("");
+  };
+
+  const remover = (i: number) => {
+    const novas = partes.filter((_, idx) => idx !== i);
+    onChange(novas.join(" | "));
+  };
+
+  const editar = (i: number, val: string) => {
+    const novas = [...partes];
+    novas[i] = val;
+    onChange(novas.join(" | "));
+  };
+
+  return (
+    <div className="space-y-2">
+      <label className="block text-xs font-semibold text-gray-700">
+        <span className="flex items-center gap-1.5">
+          <Icon size={12} />
+          {label}
+        </span>
+      </label>
+
+      {/* Lista de partes já adicionadas */}
+      {partes.length > 0 && (
+        <div className="space-y-1.5">
+          {partes.map((p, i) => (
+            <div key={i} className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs ${cor}`}>
+              <span className="w-4 h-4 rounded-full bg-white/70 flex items-center justify-center text-[9px] font-bold shrink-0">
+                {i + 1}
+              </span>
+              <input
+                value={p}
+                onChange={e => editar(i, e.target.value)}
+                className="flex-1 bg-transparent outline-none text-xs font-medium placeholder:opacity-50"
+                placeholder="Nome da parte..."
+              />
+              <button type="button" onClick={() => remover(i)} className="shrink-0 opacity-50 hover:opacity-100 transition-opacity">
+                <X size={12} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Campo para nova parte */}
+      <div className="flex gap-2">
+        <input
+          value={novo}
+          onChange={e => setNovo(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); adicionar(); } }}
+          placeholder={`Adicionar ${polo === "ativo" ? "autor/reclamante" : "réu/reclamado"}...`}
+          className="flex-1 px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-[#c9a84c] focus:ring-2 focus:ring-[#c9a84c]/10"
+        />
+        <button
+          type="button"
+          onClick={adicionar}
+          disabled={!novo.trim()}
+          className={`px-3 py-2 text-white text-xs font-semibold rounded-lg disabled:opacity-30 transition-colors flex items-center gap-1 ${corBtn}`}
+        >
+          <Plus size={12} />
+          Add
+        </button>
+      </div>
+      {partes.length === 0 && (
+        <p className="text-[10px] text-gray-400">Pressione Enter ou clique em Add para incluir cada parte separadamente.</p>
+      )}
+    </div>
+  );
+}
 
 const schema = z.object({
   numero: z.string().min(1, "Número do processo é obrigatório"),
@@ -37,16 +129,31 @@ type FormData = z.infer<typeof schema>;
 
 type Cliente = { id: string; nome: string; cpfCnpj: string | null };
 
-export default function NovoProcessoPage() {
+export default function NovoProcessoPageWrapper() {
+  return (
+    <Suspense>
+      <NovoProcessoPage />
+    </Suspense>
+  );
+}
+
+function NovoProcessoPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const clienteIdParam = searchParams.get("clienteId") ?? "";
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [salvando, setSalvando] = useState(false);
+  const [poloAtivo, setPoloAtivo] = useState("");
+  const [poloPassivo, setPoloPassivo] = useState("");
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: { clienteId: clienteIdParam },
+  });
 
   useEffect(() => {
     fetch("/api/v1/clientes?limit=200")
@@ -59,6 +166,8 @@ export default function NovoProcessoPage() {
     try {
       const payload = {
         ...data,
+        poloAtivo: poloAtivo || undefined,
+        poloPassivo: poloPassivo || undefined,
         valorCausa: data.valorCausa ? Number(data.valorCausa) : undefined,
         honorarios: data.honorarios ? Number(data.honorarios) : undefined,
         percentualExito: data.percentualExito ? Number(data.percentualExito) : undefined,
@@ -199,12 +308,20 @@ export default function NovoProcessoPage() {
             <Field label="Comarca" error={errors.comarca?.message}>
               <input {...register("comarca")} placeholder="Ex: Capital" className={inputCls(errors.comarca?.message)} />
             </Field>
-            <Field label="Polo Ativo" error={errors.poloAtivo?.message}>
-              <input {...register("poloAtivo")} placeholder="Nome da parte autora" className={inputCls(errors.poloAtivo?.message)} />
-            </Field>
-            <Field label="Polo Passivo" error={errors.poloPassivo?.message}>
-              <input {...register("poloPassivo")} placeholder="Nome da parte ré" className={inputCls(errors.poloPassivo?.message)} />
-            </Field>
+            <div className="md:col-span-3 grid md:grid-cols-2 gap-6 mt-2 p-4 bg-gray-50 rounded-xl border border-gray-100">
+              <PartesInput
+                label="Polo Ativo — Autor(es) / Reclamante(s)"
+                polo="ativo"
+                value={poloAtivo}
+                onChange={setPoloAtivo}
+              />
+              <PartesInput
+                label="Polo Passivo — Réu(s) / Reclamado(s)"
+                polo="passivo"
+                value={poloPassivo}
+                onChange={setPoloPassivo}
+              />
+            </div>
             <Field label="UF" error={errors.uf?.message}>
               <input {...register("uf")} placeholder="RJ" maxLength={2} className={inputCls(errors.uf?.message)} />
             </Field>

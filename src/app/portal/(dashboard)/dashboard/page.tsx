@@ -16,7 +16,7 @@ type Processo = {
   areaJuridica: string;
   status: string;
   tribunal: string | null;
-  updatedAt: string;
+  atualizadoEm: string;
 };
 
 const AREA_LABELS: Record<string, string> = {

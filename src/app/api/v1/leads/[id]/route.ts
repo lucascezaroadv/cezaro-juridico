@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { apiAuth } from "@/shared/auth/api-auth";
 import { prisma } from "@/shared/database/prisma";
 import { z } from "zod";
 
@@ -15,8 +15,8 @@ const updateSchema = z.object({
 });
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  const { userId, error } = await apiAuth();
+  if (error) return error;
 
   const { id } = await params;
   const lead = await prisma.lead.findUnique({
@@ -25,6 +25,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       responsavel: { select: { id: true, nome: true } },
       propostas: true,
       cliente: { select: { id: true, nome: true } },
+      comentarios: {
+        include: { autor: { select: { nome: true } } },
+        orderBy: { criadoEm: "asc" as const },
+      },
     },
   });
 
@@ -33,8 +37,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 }
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  const { userId, error } = await apiAuth();
+  if (error) return error;
 
   const { id } = await params;
   const body = await request.json();
@@ -53,8 +57,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  const { userId, error } = await apiAuth();
+  if (error) return error;
 
   const { id } = await params;
   const { etapa } = await request.json();

@@ -12,7 +12,8 @@ datasource db {
 
 model Usuario {
   id        String   @id @default(cuid())
-  clerkId   String   @unique
+  clerkId   String?  @unique
+  senhaHash String?
   nome      String
   email     String   @unique
   cargo     Cargo    @default(ADVOGADO)

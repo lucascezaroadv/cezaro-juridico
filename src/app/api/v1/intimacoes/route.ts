@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { apiAuth } from "@/shared/auth/api-auth";
 import { prisma } from "@/shared/database/prisma";
 import { z } from "zod";
 
@@ -14,8 +14,8 @@ const schema = z.object({
 });
 
 export async function GET(request: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  const { userId, error } = await apiAuth();
+  if (error) return error;
 
   const { searchParams } = new URL(request.url);
   const status = searchParams.get("status");
@@ -48,8 +48,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  const { userId, error } = await apiAuth();
+  if (error) return error;
 
   const body = await request.json();
   const parsed = schema.safeParse(body);

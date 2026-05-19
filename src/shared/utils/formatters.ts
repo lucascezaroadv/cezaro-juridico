@@ -1,12 +1,18 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-export function formatarData(data: Date | string, pattern = "dd/MM/yyyy"): string {
-  return format(new Date(data), pattern, { locale: ptBR });
+export function formatarData(data: Date | string | null | undefined, pattern = "dd/MM/yyyy"): string {
+  if (!data) return "—";
+  const d = new Date(data);
+  if (isNaN(d.getTime())) return "—";
+  return format(d, pattern, { locale: ptBR });
 }
 
-export function formatarDataHora(data: Date | string): string {
-  return format(new Date(data), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
+export function formatarDataHora(data: Date | string | null | undefined): string {
+  if (!data) return "—";
+  const d = new Date(data);
+  if (isNaN(d.getTime())) return "—";
+  return format(d, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
 }
 
 export function formatarMoeda(valor: number): string {

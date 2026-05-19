@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { apiAuth } from "@/shared/auth/api-auth";
 import { prisma } from "@/shared/database/prisma";
 
 export async function POST(request: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  const { userId, error } = await apiAuth();
+  if (error) return error;
 
   const { intimacaoId } = await request.json();
   if (!intimacaoId) return NextResponse.json({ error: "intimacaoId obrigatório" }, { status: 422 });

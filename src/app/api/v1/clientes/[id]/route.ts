@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { apiAuth } from "@/shared/auth/api-auth";
 import { prisma } from "@/shared/database/prisma";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  const { userId, error } = await apiAuth();
+  if (error) return error;
 
   const { id } = await params;
   const cliente = await prisma.cliente.findUnique({
@@ -24,18 +24,27 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 }
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  const { userId, error } = await apiAuth();
+  if (error) return error;
 
   const { id } = await params;
-  const body = await request.json();
-  const cliente = await prisma.cliente.update({ where: { id }, data: body });
-  return NextResponse.json(cliente);
+  try {
+    const body = await request.json();
+    // Remove empty strings so they don't override existing values as blank
+    const data = Object.fromEntries(
+      Object.entries(body).filter(([, v]) => v !== "")
+    );
+    const cliente = await prisma.cliente.update({ where: { id }, data });
+    return NextResponse.json(cliente);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  const { userId, error } = await apiAuth();
+  if (error) return error;
 
   const { id } = await params;
   await prisma.cliente.delete({ where: { id } });

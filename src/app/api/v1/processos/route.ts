@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { apiAuth } from "@/shared/auth/api-auth";
 import { prisma } from "@/shared/database/prisma";
 import { z } from "zod";
 
@@ -27,8 +27,8 @@ const criarProcessoSchema = z.object({
 });
 
 export async function GET(request: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  const { userId, error } = await apiAuth();
+  if (error) return error;
 
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q") ?? "";
@@ -70,8 +70,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  const { userId, error } = await apiAuth();
+  if (error) return error;
 
   const body = await request.json();
   const parsed = criarProcessoSchema.safeParse(body);
@@ -81,13 +81,17 @@ export async function POST(request: NextRequest) {
 
   const { dataDistribuicao, ...rest } = parsed.data;
 
-  const processo = await prisma.processo.create({
-    data: {
-      ...rest,
-      dataDistribuicao: dataDistribuicao ? new Date(dataDistribuicao) : undefined,
-    },
-    include: { cliente: { select: { id: true, nome: true } } },
-  });
-
-  return NextResponse.json(processo, { status: 201 });
+  try {
+    const processo = await prisma.processo.create({
+      data: {
+        ...rest,
+        dataDistribuicao: dataDistribuicao ? new Date(dataDistribuicao) : undefined,
+      },
+      include: { cliente: { select: { id: true, nome: true } } },
+    });
+    return NextResponse.json(processo, { status: 201 });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }

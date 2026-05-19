@@ -44,14 +44,21 @@ export default function NovoClientePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
+
+      let json: Record<string, unknown> = {};
+      try { json = await res.json(); } catch { /* resposta não era JSON */ }
+
       if (!res.ok) {
-        const err = await res.json();
-        toast.error("Erro ao cadastrar cliente", { description: err.error });
+        toast.error("Erro ao cadastrar cliente", {
+          description: (json.error as string) ?? `Código HTTP ${res.status}`,
+        });
         return;
       }
-      const cliente = await res.json();
       toast.success("Cliente cadastrado com sucesso!");
-      router.push(`/clientes/${cliente.id}`);
+      router.push(`/clientes/${json.id}`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro de rede", { description: "Não foi possível conectar ao servidor." });
     } finally {
       setSalvando(false);
     }
@@ -84,7 +91,10 @@ export default function NovoClientePage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <form onSubmit={handleSubmit(onSubmit, (errs) => {
+        console.error("Erros de validação:", errs);
+        toast.error("Preencha os campos obrigatórios", { description: Object.values(errs).map((e) => e?.message).filter(Boolean).join(", ") });
+      })} className="space-y-5">
         {/* Tipo */}
         <section className="bg-white rounded-xl border border-gray-100 p-6">
           <h2 className="text-sm font-bold text-gray-800 mb-5 flex items-center gap-2">
