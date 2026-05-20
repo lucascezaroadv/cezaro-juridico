@@ -155,6 +155,47 @@ export default function HomePage() {
         <div className="absolute left-0 top-0 bottom-0 w-[1px] bg-white/10" />
         <div className="absolute left-[clamp(40px,6vw,80px)] top-0 bottom-0 w-[1px] bg-white/5" />
 
+        {/* Nome do escritório — canto superior esquerdo */}
+        <div className="absolute top-[88px] left-0 right-0 z-10 pointer-events-none">
+          <div className="max-w-7xl mx-auto px-6 md:px-12">
+            <div className="flex items-center gap-4">
+              {/* Mini balança inline */}
+              <div
+                className="relative shrink-0"
+                style={{ width: 28, height: 28, filter: "brightness(0) invert(1)", opacity: 0.65 }}
+              >
+                <Image src="/logo-balanca.png" alt="" fill quality={100} style={{ objectFit: "contain" }} />
+              </div>
+              {/* Nome */}
+              <div
+                style={{
+                  fontFamily: "'Cormorant Garamond', Georgia, serif",
+                  fontSize: "0.82rem",
+                  letterSpacing: "0.22em",
+                  color: "rgba(255,255,255,0.55)",
+                  textTransform: "uppercase",
+                  fontWeight: 500,
+                }}
+              >
+                Cezaro Costa
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: "1px",
+                    height: "10px",
+                    background: "rgba(255,255,255,0.25)",
+                    margin: "0 12px",
+                    verticalAlign: "middle",
+                  }}
+                />
+                <span style={{ fontWeight: 300, fontStyle: "italic", letterSpacing: "0.12em" }}>
+                  Consultoria e Assessoria Jurídica
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Linha horizontal sutil no topo */}
         <div className="absolute top-[120px] left-0 right-0 h-[1px] bg-white/8" />
 
