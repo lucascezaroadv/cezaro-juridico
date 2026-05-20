@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import Anthropic from "@anthropic-ai/sdk";
 import { apiAuth } from "@/shared/auth/api-auth";
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -190,7 +191,7 @@ AVISO PADRÃO (sempre presente ao final de peças completas)
 Ao final de peças processuais completas, inclua sempre:
 
 ---
-*⚖️ Este documento foi elaborado com apoio de inteligência artificial. Deve ser obrigatoriamente revisado, ajustado e assinado pelo advogado responsável antes de qualquer protocolo ou envio. O assistente não substitui o julgamento profissional do advogado.*
+*⚖️ Este documento foi elaborado com apoio de inteligência artificial Claude (Anthropic). Deve ser obrigatoriamente revisado, ajustado e assinado pelo advogado responsável antes de qualquer protocolo ou envio. O assistente não substitui o julgamento profissional do advogado.*
 
 Responda SEMPRE em português brasileiro formal e jurídico.`;
 
@@ -219,13 +220,15 @@ export const TEMPLATES: Record<string, string> = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export async function POST(request: NextRequest) {
-  const { userId, error } = await apiAuth();
+  const { error } = await apiAuth();
   if (error) return error;
 
-  const groqKey = process.env.GROQ_API_KEY;
-  const openaiKey = process.env.OPENAI_API_KEY;
-  if (!groqKey && !openaiKey) {
-    return new Response(JSON.stringify({ error: "Assistente IA não configurado" }), { status: 503 });
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  if (!anthropicKey) {
+    return new Response(
+      JSON.stringify({ error: "Assistente IA não configurado. Configure ANTHROPIC_API_KEY." }),
+      { status: 503 }
+    );
   }
 
   let body: {
@@ -258,13 +261,11 @@ export async function POST(request: NextRequest) {
 
   const { mensagens, contexto } = body;
 
-  const messages: { role: string; content: string }[] = [
-    { role: "system", content: SYSTEM_PROMPT },
-  ];
+  // Montar system prompt com contexto rico
+  let systemContent = SYSTEM_PROMPT;
 
-  // Injetar contexto rico
   if (contexto && Object.values(contexto).some(v => v?.toString().trim())) {
-    const parts: string[] = ["═══ CONTEXTO DO CASO (fornecido pelo advogado) ═══"];
+    const parts: string[] = ["\n\n═══ CONTEXTO DO CASO (fornecido pelo advogado) ═══"];
 
     if (contexto.modo) parts.push(`MODO SOLICITADO: ${contexto.modo}`);
     if (contexto.tipo) parts.push(`Tipo de documento: ${contexto.tipo}`);
@@ -293,63 +294,38 @@ export async function POST(request: NextRequest) {
     }
 
     parts.push("\n═══ FIM DO CONTEXTO ═══");
-    messages.push({ role: "system", content: parts.join("\n") });
+    systemContent += parts.join("\n");
   }
 
-  messages.push(...mensagens);
+  // Converter mensagens para o formato Anthropic
+  const messages: Anthropic.MessageParam[] = mensagens.map((m) => ({
+    role: m.role,
+    content: m.content,
+  }));
 
   try {
-    // Groq (gratuito) tem prioridade; OpenAI é fallback se configurado
-    const groqKey = process.env.GROQ_API_KEY;
-    const openaiKey = process.env.OPENAI_API_KEY;
-    const useGroq = !!groqKey;
+    const client = new Anthropic({ apiKey: anthropicKey });
 
-    const endpoint = useGroq
-      ? "https://api.groq.com/openai/v1/chat/completions"
-      : "https://api.openai.com/v1/chat/completions";
-    const authKey = useGroq ? groqKey : openaiKey;
-    const model = useGroq ? "llama-3.3-70b-versatile" : "gpt-4o";
-
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authKey}`,
-      },
-      body: JSON.stringify({
-        model,
-        messages,
-        stream: true,
-        max_tokens: 8192,
-        temperature: 0.25,
-      }),
+    const stream = await client.messages.stream({
+      model: "claude-sonnet-4-5",
+      max_tokens: 8096,
+      temperature: 0.25,
+      system: systemContent,
+      messages,
     });
-
-    if (!res.ok) {
-      const errText = await res.text();
-      return new Response(JSON.stringify({ error: `Erro OpenAI: ${errText}` }), { status: 502 });
-    }
 
     const { readable, writable } = new TransformStream();
     const writer = writable.getWriter();
-    const reader = res.body!.getReader();
-    const decoder = new TextDecoder();
+    const encoder = new TextEncoder();
 
     (async () => {
       try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value);
-          const lines = chunk.split("\n").filter(l => l.startsWith("data: "));
-          for (const line of lines) {
-            const data = line.slice(6);
-            if (data === "[DONE]") continue;
-            try {
-              const parsed = JSON.parse(data);
-              const delta = parsed.choices?.[0]?.delta?.content ?? "";
-              if (delta) await writer.write(new TextEncoder().encode(delta));
-            } catch { /* skip malformed */ }
+        for await (const chunk of stream) {
+          if (
+            chunk.type === "content_block_delta" &&
+            chunk.delta.type === "text_delta"
+          ) {
+            await writer.write(encoder.encode(chunk.delta.text));
           }
         }
       } finally {

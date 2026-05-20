@@ -51,6 +51,13 @@ export default function SiteNav() {
               <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-[#8B1A1A] group-hover:w-full transition-all duration-300" />
             </Link>
           ))}
+          <Link
+            href="/login"
+            className="text-[#3D2020]/70 hover:text-[#8B1A1A] text-sm tracking-wide font-[family-name:var(--font-lato)] transition-colors duration-200 relative group"
+          >
+            Área Restrita
+            <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-[#8B1A1A] group-hover:w-full transition-all duration-300" />
+          </Link>
           <a
             href="https://wa.me/5500000000000"
             target="_blank"
@@ -84,6 +91,13 @@ export default function SiteNav() {
               {l.label}
             </Link>
           ))}
+          <Link
+            href="/login"
+            onClick={() => setOpen(false)}
+            className="text-[#3D2020]/80 hover:text-[#8B1A1A] font-[family-name:var(--font-lato)] text-base tracking-wide transition-colors border-b border-gray-100 pb-3"
+          >
+            Área Restrita
+          </Link>
           <a
             href="https://wa.me/5500000000000"
             target="_blank"

@@ -1,168 +1,95 @@
 "use client";
 
+import Image from "next/image";
+
 /**
- * Logo oficial Cezaro Costa — balança artística fiel à identidade da marca.
- * Disponível em duas variantes: "color" (vermelho #8B1A1A) e "white" (branco).
- * Layouts: "horizontal" (balança + texto lado a lado) e "stacked" (texto abaixo).
+ * Logo oficial Cezaro Costa usando o arquivo PNG real do designer.
+ * Arquivo esperado: /public/logo-balanca.png (versão escura/preta)
+ *
+ * variant="white"  → aplica filtro CSS para tornar branco (uso em fundo vermelho/escuro)
+ * variant="color"  → aplica filtro CSS para tornar vermelho #8B1A1A (uso em fundo branco)
+ *
+ * layout="stacked"    → balança em cima, texto abaixo (hero)
+ * layout="horizontal" → balança à esquerda, texto à direita (navbar)
+ * layout="mark-only"  → só a balança, sem texto (decorativo)
  */
 
 type Props = {
   variant?: "color" | "white";
   layout?: "horizontal" | "stacked" | "mark-only";
   className?: string;
-  scaleSize?: number; // tamanho em px da balança
+  scaleSize?: number;
 };
 
-// Balança artística — fiel à identidade visual da marca
-function BalancaSVG({ color, size = 80 }: { color: string; size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 120 120"
-      fill="none"
-      aria-hidden="true"
-    >
-      {/* ── Monograma ⟨LCC⟩ ── */}
-      <text
-        x="60"
-        y="14"
-        textAnchor="middle"
-        fontFamily="'Cormorant Garamond', Georgia, serif"
-        fontSize="10"
-        fontStyle="italic"
-        fill={color}
-        stroke="none"
-        letterSpacing="1"
-      >
-        {"⟨LCC⟩"}
-      </text>
-      {/* traço decorativo acima */}
-      <path d="M54 4 Q58 2 60 3 Q62 4 66 4" stroke={color} strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-
-      {/* ── Viga / braço principal — curva assimétrica (esquerda cai, direita sobe) ── */}
-      <path
-        d="M 26 52 C 38 48, 58 42, 95 30"
-        stroke={color}
-        strokeWidth="3"
-        strokeLinecap="round"
-        fill="none"
-      />
-
-      {/* ── Coluna central (tronco orgânico) ── */}
-      <path
-        d="M 61 44 C 60 54, 59 62, 60 72 C 60 78, 60 84, 61 90"
-        stroke={color}
-        strokeWidth="2"
-        strokeLinecap="round"
-        fill="none"
-      />
-      {/* detalhe interno do tronco */}
-      <path
-        d="M 61 72 C 59 76, 60 82, 62 86"
-        stroke={color}
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        fill="none"
-      />
-
-      {/* ── Base triangular ── */}
-      <path
-        d="M 49 92 C 52 98, 60 104, 68 100 L 72 92"
-        stroke={color}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-
-      {/* ── Lado ESQUERDO — prato mais baixo (peso maior) ── */}
-      {/* fio esquerdo */}
-      <path
-        d="M 28 53 L 20 68"
-        stroke={color}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        fill="none"
-      />
-      {/* prato esquerdo — curva larga, mais baixo */}
-      <path
-        d="M 4 82 C 6 90, 14 96, 24 94 C 34 92, 40 86, 38 78"
-        stroke={color}
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        fill="none"
-      />
-      {/* vincos internos prato esquerdo (3 linhas) */}
-      <path d="M 10 84 L 8 93" stroke={color} strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-      <path d="M 17 82 L 16 92" stroke={color} strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-      <path d="M 25 81 L 25 90" stroke={color} strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-
-      {/* ── Lado DIREITO — prato mais alto ── */}
-      {/* fio direito */}
-      <path
-        d="M 92 32 L 90 48"
-        stroke={color}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        fill="none"
-      />
-      {/* prato direito — curva mais alta */}
-      <path
-        d="M 72 58 C 74 64, 82 68, 92 66 C 102 64, 108 56, 106 50"
-        stroke={color}
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        fill="none"
-      />
-      {/* vincos internos prato direito (2 linhas) */}
-      <path d="M 80 60 L 78 66" stroke={color} strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-      <path d="M 90 58 L 90 65" stroke={color} strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-    </svg>
-  );
-}
+// Filtros CSS para recolorir o PNG preto original
+const filters = {
+  // Torna branco puro
+  white: "brightness(0) invert(1)",
+  // Torna vermelho #8B1A1A
+  color:
+    "brightness(0) saturate(100%) invert(14%) sepia(72%) saturate(800%) hue-rotate(330deg) brightness(0.85)",
+};
 
 export default function LogoCezaro({
   variant = "color",
   layout = "horizontal",
   className = "",
-  scaleSize,
+  scaleSize = 80,
 }: Props) {
-  const primary = variant === "white" ? "#FFFFFF" : "#8B1A1A";
-  const textColor = variant === "white" ? "text-white" : "text-[#8B1A1A]";
-  const subColor = variant === "white" ? "rgba(255,255,255,0.75)" : "#5A1010";
+  const filter = filters[variant];
+  const textColor = variant === "white" ? "#FFFFFF" : "#8B1A1A";
+  const subColor = variant === "white" ? "rgba(255,255,255,0.8)" : "#6B1010";
+
+  const Balanca = (
+    <div style={{ width: scaleSize, height: scaleSize, flexShrink: 0 }}>
+      <Image
+        src="/logo-balanca.png"
+        alt="Balança da Justiça — Cezaro Costa"
+        width={scaleSize}
+        height={scaleSize}
+        style={{ filter, objectFit: "contain", width: "100%", height: "100%" }}
+        priority
+      />
+    </div>
+  );
 
   if (layout === "mark-only") {
-    return <BalancaSVG color={primary} size={scaleSize ?? 80} />;
+    return <div className={className}>{Balanca}</div>;
   }
 
   if (layout === "stacked") {
-    // Balança em cima, texto abaixo — como nas imagens de fundo vermelho
     return (
-      <div className={`flex flex-col items-center gap-3 ${className}`}>
-        <BalancaSVG color={primary} size={scaleSize ?? 96} />
-        <div className="text-center">
+      <div className={`flex flex-col items-center ${className}`}>
+        {Balanca}
+        <div className="text-center mt-2">
           <div
-            className={`font-[family-name:var(--font-cormorant)] text-2xl font-semibold tracking-[0.12em] ${textColor}`}
-            style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+            style={{
+              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              fontSize: "1.6rem",
+              fontWeight: 600,
+              letterSpacing: "0.06em",
+              color: textColor,
+              lineHeight: 1.1,
+            }}
           >
             Cezaro Costa
           </div>
           <div
-            className="mt-1"
             style={{
               width: "100%",
               height: "1px",
-              background: primary,
-              opacity: 0.6,
+              background: textColor,
+              opacity: 0.5,
+              margin: "6px 0 4px",
             }}
           />
           <div
-            className="mt-1 text-xs tracking-[0.08em]"
             style={{
               fontFamily: "'Cormorant Garamond', Georgia, serif",
-              color: subColor,
+              fontSize: "0.85rem",
               fontStyle: "italic",
+              letterSpacing: "0.04em",
+              color: subColor,
             }}
           >
             Advocacia e Consultoria Jurídica
@@ -172,27 +99,39 @@ export default function LogoCezaro({
     );
   }
 
-  // layout === "horizontal" — balança à esquerda, texto à direita
+  // horizontal
   return (
-    <div className={`flex items-center gap-4 ${className}`}>
-      <BalancaSVG color={primary} size={scaleSize ?? 56} />
+    <div className={`flex items-center gap-3 ${className}`}>
+      {Balanca}
       <div>
         <div
-          className={`font-[family-name:var(--font-cormorant)] text-xl font-semibold tracking-[0.08em] leading-none ${textColor}`}
-          style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+          style={{
+            fontFamily: "'Cormorant Garamond', Georgia, serif",
+            fontSize: "1.15rem",
+            fontWeight: 600,
+            letterSpacing: "0.05em",
+            color: textColor,
+            lineHeight: 1,
+          }}
         >
           Cezaro Costa
         </div>
         <div
-          className="mt-1.5"
-          style={{ width: "100%", height: "1px", background: primary, opacity: 0.5 }}
+          style={{
+            width: "100%",
+            height: "1px",
+            background: textColor,
+            opacity: 0.4,
+            margin: "5px 0 3px",
+          }}
         />
         <div
-          className="mt-1 text-[11px] tracking-[0.06em]"
           style={{
             fontFamily: "'Cormorant Garamond', Georgia, serif",
-            color: subColor,
+            fontSize: "0.68rem",
             fontStyle: "italic",
+            letterSpacing: "0.04em",
+            color: subColor,
           }}
         >
           Advocacia e Consultoria Jurídica

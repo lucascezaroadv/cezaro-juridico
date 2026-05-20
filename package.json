@@ -15,6 +15,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.97.1",
     "@base-ui/react": "^1.4.1",
     "@clerk/nextjs": "^7.3.3",
     "@hookform/resolvers": "^5.2.2",
