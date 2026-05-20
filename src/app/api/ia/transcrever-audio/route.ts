@@ -1,45 +1,61 @@
 import { NextRequest, NextResponse } from "next/server";
 import { apiAuth } from "@/shared/auth/api-auth";
 
-export const maxDuration = 60;
-
+/**
+ * Transcrição de áudio via Groq Whisper (gratuito).
+ * Aceita: mp3, mp4, m4a, wav, webm, ogg — até 25MB.
+ * Retorna: { transcricao: string }
+ */
 export async function POST(request: NextRequest) {
-  const { userId, error } = await apiAuth();
+  const { error } = await apiAuth();
   if (error) return error;
 
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return NextResponse.json({ error: "OpenAI não configurado" }, { status: 503 });
-
-  const formData = await request.formData();
-  const file = formData.get("audio") as File | null;
-  if (!file) return NextResponse.json({ error: "Arquivo de áudio obrigatório" }, { status: 422 });
-
-  const maxBytes = 25 * 1024 * 1024; // Whisper API limit: 25 MB
-  if (file.size > maxBytes) {
-    return NextResponse.json({ error: "Arquivo muito grande. Limite: 25 MB." }, { status: 413 });
+  const groqKey = process.env.GROQ_API_KEY;
+  if (!groqKey) {
+    return NextResponse.json({ error: "Serviço de transcrição não configurado" }, { status: 503 });
   }
 
-  const whisperForm = new FormData();
-  whisperForm.append("file", file);
-  whisperForm.append("model", "whisper-1");
-  whisperForm.append("language", "pt");
-  whisperForm.append(
-    "prompt",
-    "Transcrição de reunião entre advogado e cliente sobre caso jurídico brasileiro. Pode conter termos técnicos jurídicos, nomes de leis, artigos e procedimentos legais."
-  );
-
-  const res = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}` },
-    body: whisperForm,
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    console.error("Whisper error:", err);
-    return NextResponse.json({ error: "Erro ao transcrever áudio" }, { status: 502 });
+  let formData: FormData;
+  try {
+    formData = await request.formData();
+  } catch {
+    return NextResponse.json({ error: "Erro ao ler o arquivo enviado" }, { status: 400 });
   }
 
-  const data = await res.json();
-  return NextResponse.json({ transcricao: data.text });
+  const audio = formData.get("audio") as File | null;
+  if (!audio) {
+    return NextResponse.json({ error: "Nenhum arquivo de áudio enviado" }, { status: 400 });
+  }
+
+  if (audio.size > 25 * 1024 * 1024) {
+    return NextResponse.json({ error: "Arquivo muito grande. Limite: 25MB" }, { status: 413 });
+  }
+
+  try {
+    const groqForm = new FormData();
+    groqForm.append("file", audio, audio.name);
+    groqForm.append("model", "whisper-large-v3");
+    groqForm.append("language", "pt");
+    groqForm.append("response_format", "text");
+    groqForm.append("temperature", "0");
+
+    const res = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${groqKey}` },
+      body: groqForm,
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error("Groq Whisper error:", errText);
+      return NextResponse.json({ error: "Falha na transcrição. Tente novamente." }, { status: 502 });
+    }
+
+    const transcricao = await res.text();
+    return NextResponse.json({ transcricao: transcricao.trim() });
+
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }

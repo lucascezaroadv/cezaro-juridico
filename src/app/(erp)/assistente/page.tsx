@@ -437,8 +437,12 @@ export default function AssistentePage() {
         }));
         setTranscricaoConcluida(true);
         setSecaoContexto("basico");
+      } else {
+        alert(`Erro na transcrição: ${data.error ?? "Tente novamente."}`);
       }
-    } catch { /* silent */ } finally {
+    } catch (err) {
+      alert(`Erro: ${err instanceof Error ? err.message : "Falha ao transcrever o áudio."}`);
+    } finally {
       setTranscrevendo(false);
     }
   };
@@ -940,7 +944,7 @@ export default function AssistentePage() {
             )}
           </div>
           <p className="text-[9px] text-gray-300 text-center mt-2 hidden md:block">
-            GPT-4o · As peças devem ser revisadas e assinadas pelo advogado responsável antes do protocolo · O assistente não inventa jurisprudência
+            Claude · As peças devem ser revisadas e assinadas pelo advogado responsável antes do protocolo · O assistente não inventa jurisprudência
           </p>
         </div>
       </div>

@@ -224,12 +224,17 @@ export async function POST(request: NextRequest) {
   if (error) return error;
 
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  if (!anthropicKey) {
+  const groqKey = process.env.GROQ_API_KEY;
+
+  if (!anthropicKey && !groqKey) {
     return new Response(
-      JSON.stringify({ error: "Assistente IA não configurado. Configure ANTHROPIC_API_KEY." }),
+      JSON.stringify({ error: "Assistente IA não configurado. Configure ANTHROPIC_API_KEY ou GROQ_API_KEY." }),
       { status: 503 }
     );
   }
+
+  // Se não tiver chave Anthropic, usa Groq como fallback
+  const usarGroq = !anthropicKey && !!groqKey;
 
   let body: {
     mensagens: { role: "user" | "assistant"; content: string }[];
@@ -303,45 +308,109 @@ export async function POST(request: NextRequest) {
     content: m.content,
   }));
 
-  try {
-    const client = new Anthropic({ apiKey: anthropicKey });
+  const { readable, writable } = new TransformStream();
+  const writer = writable.getWriter();
+  const encoder = new TextEncoder();
 
-    const stream = await client.messages.stream({
-      model: "claude-sonnet-4-5",
-      max_tokens: 8096,
-      temperature: 0.25,
-      system: systemContent,
-      messages,
-    });
+  const headers = {
+    "Content-Type": "text/plain; charset=utf-8",
+    "X-Content-Type-Options": "nosniff",
+    "Cache-Control": "no-cache",
+  };
 
-    const { readable, writable } = new TransformStream();
-    const writer = writable.getWriter();
-    const encoder = new TextEncoder();
+  if (!usarGroq && anthropicKey) {
+    // ── Claude (Anthropic) ──────────────────────────────────────────────────
+    try {
+      const client = new Anthropic({ apiKey: anthropicKey });
+      const stream = await client.messages.stream({
+        model: "claude-sonnet-4-5",
+        max_tokens: 8096,
+        temperature: 0.25,
+        system: systemContent,
+        messages,
+      });
 
-    (async () => {
-      try {
-        for await (const chunk of stream) {
-          if (
-            chunk.type === "content_block_delta" &&
-            chunk.delta.type === "text_delta"
-          ) {
-            await writer.write(encoder.encode(chunk.delta.text));
+      (async () => {
+        try {
+          for await (const chunk of stream) {
+            if (chunk.type === "content_block_delta" && chunk.delta.type === "text_delta") {
+              await writer.write(encoder.encode(chunk.delta.text));
+            }
           }
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : String(e);
+          await writer.write(encoder.encode(`\n\n⚠️ Erro: ${msg}`));
+        } finally {
+          await writer.close().catch(() => {});
         }
-      } finally {
-        await writer.close().catch(() => {});
-      }
-    })();
+      })();
 
-    return new Response(readable, {
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "X-Content-Type-Options": "nosniff",
-        "Cache-Control": "no-cache",
-      },
-    });
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    return new Response(JSON.stringify({ error: msg }), { status: 500 });
+      return new Response(readable, { headers });
+
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return new Response(JSON.stringify({ error: msg }), { status: 500 });
+    }
+
+  } else {
+    // ── Groq (fallback) ─────────────────────────────────────────────────────
+    const groqMessages = [
+      { role: "system", content: systemContent },
+      ...messages,
+    ];
+
+    try {
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${groqKey}`,
+        },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          messages: groqMessages,
+          stream: true,
+          max_tokens: 8192,
+          temperature: 0.25,
+        }),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        return new Response(JSON.stringify({ error: `Erro Groq: ${errText}` }), { status: 502 });
+      }
+
+      (async () => {
+        try {
+          const reader = res.body!.getReader();
+          const decoder = new TextDecoder();
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value);
+            for (const line of chunk.split("\n").filter(l => l.startsWith("data: "))) {
+              const data = line.slice(6);
+              if (data === "[DONE]") continue;
+              try {
+                const parsed = JSON.parse(data);
+                const delta = parsed.choices?.[0]?.delta?.content ?? "";
+                if (delta) await writer.write(encoder.encode(delta));
+              } catch { /* skip */ }
+            }
+          }
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : String(e);
+          await writer.write(encoder.encode(`\n\n⚠️ Erro: ${msg}`));
+        } finally {
+          await writer.close().catch(() => {});
+        }
+      })();
+
+      return new Response(readable, { headers });
+
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return new Response(JSON.stringify({ error: msg }), { status: 500 });
+    }
   }
 }
