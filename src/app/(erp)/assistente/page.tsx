@@ -306,7 +306,14 @@ export default function AssistentePage() {
         }),
       });
 
-      if (!res.ok || !res.body) throw new Error("Erro na resposta");
+      if (!res.body) throw new Error("Resposta sem corpo");
+      if (!res.ok) {
+        // Tenta extrair mensagem de erro do JSON
+        const errText = await res.text();
+        let errMsg = `Erro ${res.status}`;
+        try { errMsg = JSON.parse(errText).error ?? errMsg; } catch { errMsg = errText || errMsg; }
+        throw new Error(errMsg);
+      }
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -346,9 +353,10 @@ export default function AssistentePage() {
 
     } catch (e: unknown) {
       if ((e as Error).name !== "AbortError") {
+        const errMsg = (e as Error).message ?? "Erro desconhecido";
         setMensagens(prev => prev.map(m =>
           m.id === assistantId
-            ? { ...m, content: "⚠️ Ocorreu um erro ao processar. Verifique sua conexão e tente novamente." }
+            ? { ...m, content: `⚠️ Erro: ${errMsg}\n\nTente novamente. Se o erro persistir, verifique sua conexão ou aguarde alguns segundos.` }
             : m
         ));
       }

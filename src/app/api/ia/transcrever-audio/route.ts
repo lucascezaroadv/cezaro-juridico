@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { apiAuth } from "@/shared/auth/api-auth";
 
+export const maxDuration = 120;
+
 /**
  * Transcrição de áudio via Groq Whisper (gratuito).
  * Aceita: mp3, mp4, m4a, wav, webm, ogg — até 25MB.

@@ -2,6 +2,9 @@ import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { apiAuth } from "@/shared/auth/api-auth";
 
+// Aumenta o timeout para 120s — necessário para geração de peças longas
+export const maxDuration = 120;
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // SYSTEM PROMPT — Assistente Jurídico Profissional
 // Princípio central: nunca inventar jurisprudência, número de processo ou dado
