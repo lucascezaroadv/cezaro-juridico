@@ -121,8 +121,12 @@ export async function POST(request: NextRequest) {
     return new Response("Corpo inválido", { status: 400 });
   }
 
-  const { mensagens, contexto } = body;
-  if (!mensagens?.length) return new Response("Mensagens ausentes", { status: 400 });
+  const { mensagens: todasMensagens, contexto } = body;
+  if (!todasMensagens?.length) return new Response("Mensagens ausentes", { status: 400 });
+
+  // Limita o histórico enviado à API — máximo 10 mensagens (5 trocas)
+  // Evita estourar o limite de tokens do plano gratuito
+  const mensagens = todasMensagens.slice(-10);
 
   // 4. Montar system prompt com contexto
   let systemContent = SYSTEM_PROMPT;
@@ -141,8 +145,10 @@ export async function POST(request: NextRequest) {
     if (contexto.valorCausa) parts.push(`Valor da causa: R$ ${contexto.valorCausa}`);
     if (contexto.dataFatos) parts.push(`Data dos fatos: ${contexto.dataFatos}`);
     if (contexto.prazoResposta) parts.push(`Prazo: ${contexto.prazoResposta}`);
-    if (contexto.jurisprudencia) parts.push(`\nJurisprudência fornecida:\n${contexto.jurisprudencia}`);
-    if (contexto.informacoes) parts.push(`\nFatos e informações:\n${contexto.informacoes}`);
+    // Trunca campos longos para evitar estouro de tokens (máx ~3000 chars cada)
+    const truncar = (s: string, max = 3000) => s.length > max ? s.slice(0, max) + "\n[... conteúdo truncado para caber nos limites do modelo ...]" : s;
+    if (contexto.jurisprudencia) parts.push(`\nJurisprudência fornecida:\n${truncar(contexto.jurisprudencia)}`);
+    if (contexto.informacoes) parts.push(`\nFatos e informações:\n${truncar(contexto.informacoes, 4000)}`);
     if (contexto.template && TEMPLATES[contexto.template]) parts.push(`\nInstrução: ${TEMPLATES[contexto.template]}`);
     parts.push("═══ FIM DO CONTEXTO ═══");
     systemContent += parts.join("\n");
@@ -204,13 +210,52 @@ export async function POST(request: NextRequest) {
             model: "llama-3.3-70b-versatile",
             messages: groqMessages,
             stream: true,
-            max_tokens: 8192,
+            max_tokens: 4096,  // reduzido para respeitar o TPM do free tier
             temperature: 0.25,
           }),
         });
 
         if (!res.ok) {
           const errText = await res.text();
+
+          // Rate limit (413/429) — tenta com modelo menor e contexto mínimo
+          if (res.status === 413 || res.status === 429) {
+            controller.enqueue(enc.encode("⚠️ Limite de tokens atingido. Tentando com contexto reduzido...\n\n"));
+            const ultimaMensagem = groqMessages[groqMessages.length - 1];
+            const retryRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Authorization: `Bearer ${groqKey}` },
+              body: JSON.stringify({
+                model: "llama-3.1-8b-instant",
+                messages: [groqMessages[0], ultimaMensagem], // apenas system + última msg
+                stream: true,
+                max_tokens: 3000,
+                temperature: 0.25,
+              }),
+            });
+            if (retryRes.ok) {
+              const retryReader = retryRes.body!.getReader();
+              const retryDecoder = new TextDecoder();
+              while (true) {
+                const { done, value } = await retryReader.read();
+                if (done) break;
+                const chunk = retryDecoder.decode(value, { stream: true });
+                for (const line of chunk.split("\n")) {
+                  const t = line.trim();
+                  if (!t.startsWith("data: ")) continue;
+                  const d = t.slice(6);
+                  if (d === "[DONE]") continue;
+                  try {
+                    const delta = JSON.parse(d).choices?.[0]?.delta?.content;
+                    if (delta) controller.enqueue(enc.encode(delta));
+                  } catch { /* skip */ }
+                }
+              }
+              controller.close();
+              return;
+            }
+          }
+
           controller.enqueue(enc.encode(`⚠️ Erro Groq (${res.status}): ${errText}`));
           controller.close();
           return;
