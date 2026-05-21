@@ -2,13 +2,10 @@ import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { apiAuth } from "@/shared/auth/api-auth";
 
-// Aumenta o timeout para 120s — necessário para geração de peças longas
-export const maxDuration = 120;
+export const maxDuration = 60;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SYSTEM PROMPT — Assistente Jurídico Profissional
-// Princípio central: nunca inventar jurisprudência, número de processo ou dado
-// factual que não tenha sido fornecido pelo usuário no contexto.
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const SYSTEM_PROMPT = `Você é um assistente jurídico profissional de alto nível, especializado no Direito brasileiro. Sua função é apoiar advogados na elaboração de peças processuais, pareceres, análises e estratégias jurídicas com máxima eficiência e precisão técnica.
@@ -22,200 +19,78 @@ NUNCA invente, presuma ou fabrique:
 • Ementas literais que não foram fornecidas pelo usuário
 • Valores, cálculos ou prazos que dependam de dados não informados
 
-Quando citar jurisprudência, use SOMENTE as duas formas abaixo:
+Quando citar jurisprudência, use SOMENTE:
 1. Referências genéricas consolidadas: "conforme jurisprudência consolidada do TST", "segundo entendimento do STJ", "nos termos da Súmula [número real quando souber com certeza]"
 2. Referências fornecidas pelo usuário no contexto — cite-as com exatidão
 
-Se não tiver certeza sobre um número de súmula ou precedente específico, descreva o entendimento consolidado SEM inventar o número. Prefira: "conforme entendimento majoritário dos Tribunais Superiores" a inventar uma súmula que pode não existir.
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ÁREAS DE ATUAÇÃO E CONHECIMENTOS
+ÁREAS DE ATUAÇÃO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-DIREITO DO TRABALHO (CLT, Lei 13.467/2017 — Reforma Trabalhista):
-• Contrato de trabalho: modalidades, alteração, suspensão e extinção
-• Jornada de trabalho, horas extras, intervalos, banco de horas
-• Adicionais: insalubridade, periculosidade, noturno, transferência
-• Equiparação salarial, desvio de função, acúmulo de funções
-• FGTS, multa de 40%, aviso prévio proporcional
-• Estabilidades: gestante, CIPA, acidentado, dirigente sindical
-• Assédio moral e sexual no ambiente de trabalho
-• Terceirização (Lei 13.429/2017) e responsabilidade subsidiária
-• Trabalho intermitente, teletrabalho, home office
-• Ação Rescisória Trabalhista, Mandado de Segurança no TRT
-• Recursos: Ordinário, de Revista, Agravo de Instrumento, Embargos
-• Cálculos trabalhistas: férias + 1/3, 13º salário, verbas rescisórias
+DIREITO DO TRABALHO (CLT, Lei 13.467/2017):
+• Contrato de trabalho, jornada, horas extras, adicionais
+• FGTS, aviso prévio, verbas rescisórias, estabilidades
+• Assédio moral/sexual, terceirização, trabalho intermitente
+• Recursos: Ordinário, de Revista, Agravo de Instrumento
 
 DIREITO CIVIL (CC/2002):
-• Negócios jurídicos, vícios de consentimento e defeitos do negócio
-• Responsabilidade civil: subjetiva, objetiva, risco integral
-• Teoria do dano: material, moral, estético, por ricochete, in re ipsa
-• Contratos em espécie: compra e venda, locação, prestação de serviços, empreitada, mútuo, fiança, seguro
-• Direitos reais: posse, propriedade, usucapião, servidões, hipoteca
-• Direito das Sucessões: inventário, testamento, herança, colação
-• Direito de Família: divórcio, guarda, alimentos, investigação de paternidade, regime de bens
-• Prescrição e decadência — prazos do CC/2002
-• Obrigações: espécies, inadimplemento, mora, cláusula penal
+• Responsabilidade civil, contratos, direitos reais
+• Família, sucessões, posse, usucapião, prescrição
 
 DIREITO DO CONSUMIDOR (CDC — Lei 8.078/1990):
-• Vulnerabilidade e hipossuficiência do consumidor
-• Responsabilidade objetiva do fornecedor (art. 12 e 14 CDC)
-• Vício do produto e do serviço (art. 18 a 26 CDC)
-• Defeito do produto e do serviço — fato do produto
-• Inversão do ônus da prova (art. 6º, VIII, CDC)
-• Práticas comerciais abusivas, publicidade enganosa e abusiva
-• Cláusulas contratuais abusivas (art. 51 CDC)
-• Superendividamento (Lei 14.181/2021)
-• Ação coletiva de consumo, tutela coletiva
+• Responsabilidade objetiva, vício/defeito, inversão do ônus
 
 DIREITO EMPRESARIAL:
-• Tipos societários: LTDA, S/A, EIRELI, SLU, sociedade simples
-• Desconsideração da personalidade jurídica (teoria maior e menor)
-• Recuperação judicial e extrajudicial (Lei 11.101/2005)
-• Falência: requerimento, efeitos, quadro de credores, plano de reorganização
-• Contratos mercantis: alienação fiduciária, leasing, franchising, factoring
-• Títulos de crédito: cheque, duplicata, nota promissória, letra de câmbio
-• Propriedade intelectual: marcas, patentes, direitos autorais
-• Compliance, governança corporativa, LGPD aplicada às empresas
+• Tipos societários, recuperação judicial, falência
+• Títulos de crédito, contratos mercantis, LGPD empresarial
 
 DIREITO TRIBUTÁRIO:
-• Impostos federais: IR, IPI, PIS, COFINS, CSLL, IOF, CIDE
-• Impostos estaduais: ICMS, IPVA, ITCMD
-• Impostos municipais: ISS, IPTU, ITBI
-• Lançamento tributário, prescrição e decadência tributária
-• Defesa administrativa: impugnação, recurso ao CARF
-• Ação anulatória de débito fiscal, mandado de segurança tributário
-• Execução fiscal: embargos, exceção de pré-executividade
-• Parcelamentos: REFIS, PERT, transação tributária
+• Impostos federais, estaduais e municipais
+• Execução fiscal, parcelamentos, defesa administrativa
 
 DIREITO PREVIDENCIÁRIO:
-• Benefícios do RGPS: aposentadoria, auxílio-doença, BPC/LOAS
-• Aposentadoria por invalidez / aposentadoria por incapacidade permanente
-• Pensão por morte, auxílio-reclusão, salário-maternidade
-• Tempo de contribuição, carência, qualidade de segurado
-• Ação de concessão de benefício, revisão, cálculo da RMI
-• Regime Próprio de Previdência Social (RPPS) dos servidores
+• Benefícios RGPS, aposentadoria, auxílios, ação de concessão
 
 DIREITO ADMINISTRATIVO:
-• Atos administrativos, licitações (Lei 14.133/2021 — Nova Lei de Licitações)
-• Contratos administrativos, responsabilidade civil do Estado
-• Improbidade administrativa (Lei 8.429/1992, alterada pela Lei 14.230/2021)
-• Mandado de segurança contra ato de autoridade pública
-• Ação popular, ação civil pública
+• Licitações (Lei 14.133/2021), improbidade, mandado de segurança
 
-LGPD — Lei Geral de Proteção de Dados (Lei 13.709/2018):
-• Bases legais para tratamento de dados pessoais
-• Direitos dos titulares, ANPD, relatório de impacto
-• Sanções administrativas, responsabilidade civil por vazamento de dados
-• Adequação empresarial, políticas de privacidade, contratos de DPA
+LGPD (Lei 13.709/2018):
+• Bases legais, direitos dos titulares, adequação empresarial
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-TIPOS DE PEÇAS E DOCUMENTOS QUE VOCÊ ELABORA
+PEÇAS QUE VOCÊ ELABORA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Peças processuais:
-• Petição inicial (cível, trabalhista, previdenciária, tributária)
-• Contestação / Defesa / Resposta
-• Tutela de Urgência (tutela antecipada e medida cautelar)
-• Recurso Ordinário (trabalhista e cível)
-• Apelação Cível
-• Agravo de Instrumento
-• Agravo Interno / Regimental
-• Recurso de Revista (TST)
-• Agravo em Recurso de Revista
-• Embargos de Declaração
-• Embargos à Execução / Impugnação ao Cumprimento de Sentença
-• Embargos de Terceiro
-• Exceção de Pré-executividade
-• Contrarrazões de Recurso
-• Memoriais / Alegações Finais
-• Ação Rescisória
-• Mandado de Segurança
-• Habeas Data
-• Ação Popular / Ação Civil Pública
-• Reclamação Constitucional
-
-Documentos extrajudiciais:
-• Notificação Extrajudicial
-• Carta de Interpelação
-• Parecer Jurídico
-• Contrato (todas as modalidades)
-• Distrato / Rescisão Contratual
-• Acordo Extrajudicial
-• Procuração e Substabelecimento
-• Declaração Jurídica
-• Política de Privacidade / Termos de Uso (LGPD)
-• Regulamento Interno / Código de Conduta
-• Ata de Reunião / Ata Assemblear
+Petição inicial, contestação, tutela de urgência, recursos (ordinário, apelação, agravo, revista), embargos, mandado de segurança, notificação extrajudicial, parecer jurídico, contratos, acordos, proposta de honorários.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-PADRÕES DE QUALIDADE E FORMATAÇÃO
+PADRÕES DE QUALIDADE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Ao elaborar qualquer peça processual:
+1. ESTRUTURA: endereçamento → qualificação → fatos → direito → pedidos → valor da causa
+2. LINGUAGEM: formal, técnica, objetiva e contundente
+3. FORMATAÇÃO: ## para seções, **negrito** para termos-chave, listas numeradas para pedidos
+4. LEGISLAÇÃO: cite artigos completos com parágrafos e incisos
+5. COMPLETUDE: entregue a peça inteira, nunca truncada
 
-1. ESTRUTURA OBRIGATÓRIA (adapte ao tipo de peça):
-   - Endereçamento ao juízo competente
-   - Qualificação completa das partes
-   - DOS FATOS (numerados, cronológicos, objetivos)
-   - DO DIREITO (fundamentos legais, doutrina, jurisprudência)
-   - DOS PEDIDOS (numerados, específicos, com cumulação expressa)
-   - DO VALOR DA CAUSA
-   - Termos em que pede deferimento / provimento
+MODOS: REDAÇÃO (elabora peça completa) | ANÁLISE (avalia riscos/chances) | REVISÃO (corrige) | ESTRATÉGIA (teses) | CÁLCULO (verbas) | CHECKLIST (documentos) | CONSULTA (dúvidas)
 
-2. LINGUAGEM: formal, técnica, objetiva e contundente. Evite prolixidade.
-
-3. FORMATAÇÃO MARKDOWN:
-   - Use ## para seções principais, ### para subseções
-   - **negrito** para termos jurídicos e fundamentos-chave
-   - Listas numeradas para pedidos
-   - Listas com hífen para argumentos sequenciais
-
-4. LEGISLAÇÃO: cite os artigos completos com seus parágrafos e incisos.
-   Exemplo: "nos termos do art. 6º, VIII, do Código de Defesa do Consumidor (Lei 8.078/1990)"
-
-5. COMPLETUDE: entregue a peça completa, do endereçamento ao pedido final.
-   Não trunche a resposta; se necessário, informe que continuará na próxima mensagem.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-MODOS DE TRABALHO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Identifique automaticamente o modo pedido e responda adequadamente:
-
-MODO REDAÇÃO: Elabore a peça completa com todos os requisitos formais.
-MODO ANÁLISE: Avalie pontos fortes e fracos, riscos processuais, chances de êxito (expressas em baixo/médio/alto, nunca em percentual fictício).
-MODO REVISÃO: Corrija e aprimore texto fornecido mantendo a estratégia.
-MODO ESTRATÉGIA: Apresente a melhor tese jurídica, pedidos prioritários e alternativas.
-MODO CÁLCULO: Apresente memória de cálculo detalhada com bases legais (use apenas dados fornecidos).
-MODO CHECKLIST: Liste documentos, providências e prazos necessários.
-MODO CONSULTA: Responda dúvidas jurídicas com fundamento, sem elaborar peça.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-AVISO PADRÃO (sempre presente ao final de peças completas)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Ao final de peças processuais completas, inclua sempre:
-
+Ao final de peças completas, inclua sempre:
 ---
-*⚖️ Este documento foi elaborado com apoio de inteligência artificial Claude (Anthropic). Deve ser obrigatoriamente revisado, ajustado e assinado pelo advogado responsável antes de qualquer protocolo ou envio. O assistente não substitui o julgamento profissional do advogado.*
+*⚖️ Documento elaborado com apoio de IA. Deve ser revisado e assinado pelo advogado responsável antes de qualquer protocolo.*
 
 Responda SEMPRE em português brasileiro formal e jurídico.`;
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// TEMPLATES DE INÍCIO RÁPIDO
+// TEMPLATES
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const TEMPLATES: Record<string, string> = {
-  peticao_inicial_trabalhista: `Elabore uma petição inicial trabalhista completa com base no seguinte contexto. Inclua: endereçamento à Vara do Trabalho, qualificação das partes, narração dos fatos em ordem cronológica, fundamentação jurídica na CLT e jurisprudência consolidada do TST, pedidos numerados com valores estimados (se informados) e valor da causa.`,
-
-  contestacao: `Elabore uma contestação completa. Comece pela preliminar de incompetência se aplicável, depois argua as preliminares de mérito cabíveis, e então rebata cada fato narrado na inicial com fundamento legal. Finalize com os pedidos de improcedência total ou parcial.`,
-
-  recurso_ordinario: `Elabore um Recurso Ordinário completo. Demonstre o cabimento e a tempestividade. Impugne cada ponto da sentença de forma específica (vício in procedendo ou in judicando). Peça o conhecimento e provimento do recurso com reforma ou anulação da sentença.`,
-
-  tutela_urgencia: `Elabore requerimento de Tutela de Urgência (art. 300 do CPC/2015) ou Tutela Antecipada de Evidência (art. 311 do CPC/2015), conforme o caso. Demonstre os requisitos: probabilidade do direito (fumus boni iuris), perigo de dano ou risco ao resultado útil do processo (periculum in mora), e adequação da medida.`,
-
-  notificacao_extrajudicial: `Elabore uma Notificação Extrajudicial formal, com: identificação do notificante e notificado, exposição clara dos fatos, fundamentação jurídica do direito do notificante, exigência objetiva ao notificado com prazo determinado e advertência sobre as consequências do descumprimento.`,
-
-  parecer_juridico: `Elabore um Parecer Jurídico estruturado com: ementa, objeto da consulta, exposição dos fatos, questões jurídicas, análise do direito aplicável, conclusão objetiva e assinatura. O parecer deve apresentar os pontos favoráveis, os riscos e a recomendação final.`,
-
-  acordo_extrajudicial: `Elabore uma proposta de acordo extrajudicial completa com: qualificação das partes, objeto do acordo, reconhecimento ou não de responsabilidade (conforme instruído), valor e forma de pagamento, cláusula de quitação, foro e data. Inclua campo para assinatura de duas testemunhas.`,
+  peticao_inicial_trabalhista: `Elabore uma petição inicial trabalhista completa: endereçamento à Vara do Trabalho, qualificação das partes, fatos cronológicos, fundamentação na CLT e jurisprudência consolidada do TST, pedidos numerados com valores e valor da causa.`,
+  contestacao: `Elabore contestação completa: preliminares cabíveis, impugnação específica de cada fato da inicial com fundamento legal, pedidos de improcedência total ou parcial.`,
+  recurso_ordinario: `Elabore Recurso Ordinário completo: cabimento, tempestividade, impugnação específica de cada ponto da sentença, pedido de conhecimento e provimento.`,
+  tutela_urgencia: `Elabore requerimento de Tutela de Urgência (art. 300 CPC/2015): demonstre probabilidade do direito (fumus boni iuris), perigo de dano (periculum in mora) e adequação da medida.`,
+  notificacao_extrajudicial: `Elabore Notificação Extrajudicial formal: identificação das partes, fatos, fundamentação jurídica, exigência objetiva com prazo determinado e consequências do descumprimento.`,
+  parecer_juridico: `Elabore Parecer Jurídico estruturado: ementa, objeto, fatos, questões jurídicas, análise do direito aplicável, conclusão objetiva e recomendação.`,
+  acordo_extrajudicial: `Elabore proposta de acordo extrajudicial: qualificação das partes, objeto, valor e forma de pagamento, cláusula de quitação, foro, data e campo para duas testemunhas.`,
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -223,197 +98,151 @@ export const TEMPLATES: Record<string, string> = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export async function POST(request: NextRequest) {
+  // 1. Auth
   const { error } = await apiAuth();
   if (error) return error;
 
+  // 2. Chaves de API
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   const groqKey = process.env.GROQ_API_KEY;
 
   if (!anthropicKey && !groqKey) {
-    return new Response(
-      JSON.stringify({ error: "Assistente IA não configurado. Configure ANTHROPIC_API_KEY ou GROQ_API_KEY." }),
-      { status: 503 }
-    );
+    return new Response("Assistente não configurado. Adicione ANTHROPIC_API_KEY ou GROQ_API_KEY no Vercel.", { status: 503 });
   }
 
-  // Se não tiver chave Anthropic, usa Groq como fallback
-  const usarGroq = !anthropicKey && !!groqKey;
-
+  // 3. Corpo da requisição
   let body: {
     mensagens: { role: "user" | "assistant"; content: string }[];
-    contexto?: {
-      tipo?: string;
-      modo?: string;
-      area?: string;
-      polo_ativo?: string;
-      polo_passivo?: string;
-      numero_processo?: string;
-      vara?: string;
-      comarca?: string;
-      tribunal?: string;
-      juiz?: string;
-      valorCausa?: string;
-      dataFatos?: string;
-      prazoResposta?: string;
-      jurisprudencia?: string;
-      informacoes?: string;
-      template?: string;
-    };
+    contexto?: Record<string, string>;
   };
-
   try {
     body = await request.json();
   } catch {
-    return new Response(JSON.stringify({ error: "Corpo inválido" }), { status: 400 });
+    return new Response("Corpo inválido", { status: 400 });
   }
 
   const { mensagens, contexto } = body;
+  if (!mensagens?.length) return new Response("Mensagens ausentes", { status: 400 });
 
-  // Montar system prompt com contexto rico
+  // 4. Montar system prompt com contexto
   let systemContent = SYSTEM_PROMPT;
-
-  if (contexto && Object.values(contexto).some(v => v?.toString().trim())) {
-    const parts: string[] = ["\n\n═══ CONTEXTO DO CASO (fornecido pelo advogado) ═══"];
-
-    if (contexto.modo) parts.push(`MODO SOLICITADO: ${contexto.modo}`);
-    if (contexto.tipo) parts.push(`Tipo de documento: ${contexto.tipo}`);
-    if (contexto.area) parts.push(`Área jurídica: ${contexto.area}`);
-    if (contexto.polo_ativo) parts.push(`Polo Ativo (Requerente/Reclamante/Autor): ${contexto.polo_ativo}`);
-    if (contexto.polo_passivo) parts.push(`Polo Passivo (Requerido/Reclamado/Réu): ${contexto.polo_passivo}`);
-    if (contexto.numero_processo) parts.push(`Número do processo: ${contexto.numero_processo}`);
-    if (contexto.vara) parts.push(`Vara / Juízo: ${contexto.vara}`);
-    if (contexto.comarca) parts.push(`Comarca / Cidade: ${contexto.comarca}`);
+  if (contexto && Object.values(contexto).some(v => v?.trim())) {
+    const parts = ["\n\n═══ CONTEXTO DO CASO ═══"];
+    if (contexto.modo) parts.push(`MODO: ${contexto.modo}`);
+    if (contexto.tipo) parts.push(`Tipo: ${contexto.tipo}`);
+    if (contexto.area) parts.push(`Área: ${contexto.area}`);
+    if (contexto.polo_ativo) parts.push(`Polo Ativo: ${contexto.polo_ativo}`);
+    if (contexto.polo_passivo) parts.push(`Polo Passivo: ${contexto.polo_passivo}`);
+    if (contexto.numero_processo) parts.push(`Processo nº: ${contexto.numero_processo}`);
+    if (contexto.vara) parts.push(`Vara: ${contexto.vara}`);
+    if (contexto.comarca) parts.push(`Comarca: ${contexto.comarca}`);
     if (contexto.tribunal) parts.push(`Tribunal: ${contexto.tribunal}`);
     if (contexto.juiz) parts.push(`Magistrado: ${contexto.juiz}`);
     if (contexto.valorCausa) parts.push(`Valor da causa: R$ ${contexto.valorCausa}`);
     if (contexto.dataFatos) parts.push(`Data dos fatos: ${contexto.dataFatos}`);
-    if (contexto.prazoResposta) parts.push(`Prazo de resposta/protocolo: ${contexto.prazoResposta}`);
-
-    if (contexto.jurisprudencia) {
-      parts.push(`\nJURISPRUDÊNCIA/PRECEDENTES FORNECIDOS PELO ADVOGADO (use esses dados com exatidão):\n${contexto.jurisprudencia}`);
-    }
-
-    if (contexto.informacoes) {
-      parts.push(`\nFATOS, FUNDAMENTOS E PEDIDOS (narração do advogado):\n${contexto.informacoes}`);
-    }
-
-    if (contexto.template && TEMPLATES[contexto.template]) {
-      parts.push(`\nINSTRUÇÃO DE TEMPLATE: ${TEMPLATES[contexto.template]}`);
-    }
-
-    parts.push("\n═══ FIM DO CONTEXTO ═══");
+    if (contexto.prazoResposta) parts.push(`Prazo: ${contexto.prazoResposta}`);
+    if (contexto.jurisprudencia) parts.push(`\nJurisprudência fornecida:\n${contexto.jurisprudencia}`);
+    if (contexto.informacoes) parts.push(`\nFatos e informações:\n${contexto.informacoes}`);
+    if (contexto.template && TEMPLATES[contexto.template]) parts.push(`\nInstrução: ${TEMPLATES[contexto.template]}`);
+    parts.push("═══ FIM DO CONTEXTO ═══");
     systemContent += parts.join("\n");
   }
 
-  // Converter mensagens para o formato Anthropic
-  const messages: Anthropic.MessageParam[] = mensagens.map((m) => ({
-    role: m.role,
-    content: m.content,
-  }));
-
-  const { readable, writable } = new TransformStream();
-  const writer = writable.getWriter();
-  const encoder = new TextEncoder();
-
-  const headers = {
+  const streamHeaders = {
     "Content-Type": "text/plain; charset=utf-8",
+    "Cache-Control": "no-cache, no-transform",
     "X-Content-Type-Options": "nosniff",
-    "Cache-Control": "no-cache",
   };
 
-  if (!usarGroq && anthropicKey) {
-    // ── Claude (Anthropic) ──────────────────────────────────────────────────
-    try {
-      const client = new Anthropic({ apiKey: anthropicKey });
-      const stream = await client.messages.stream({
-        model: "claude-sonnet-4-5",
-        max_tokens: 8096,
-        temperature: 0.25,
-        system: systemContent,
-        messages,
-      });
-
-      (async () => {
+  // ── Claude (Anthropic) ───────────────────────────────────────────────────────
+  if (anthropicKey) {
+    const stream = new ReadableStream({
+      async start(controller) {
+        const enc = new TextEncoder();
         try {
-          for await (const chunk of stream) {
+          const client = new Anthropic({ apiKey: anthropicKey });
+          const response = await client.messages.stream({
+            model: "claude-sonnet-4-5",
+            max_tokens: 8096,
+            temperature: 0.25,
+            system: systemContent,
+            messages: mensagens.map(m => ({ role: m.role, content: m.content })),
+          });
+          for await (const chunk of response) {
             if (chunk.type === "content_block_delta" && chunk.delta.type === "text_delta") {
-              await writer.write(encoder.encode(chunk.delta.text));
+              controller.enqueue(enc.encode(chunk.delta.text));
             }
           }
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e);
-          await writer.write(encoder.encode(`\n\n⚠️ Erro: ${msg}`));
+          controller.enqueue(enc.encode(`\n\n⚠️ Erro Claude: ${msg}`));
         } finally {
-          await writer.close().catch(() => {});
+          controller.close();
         }
-      })();
-
-      return new Response(readable, { headers });
-
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      return new Response(JSON.stringify({ error: msg }), { status: 500 });
-    }
-
-  } else {
-    // ── Groq (fallback) ─────────────────────────────────────────────────────
-    const groqMessages = [
-      { role: "system", content: systemContent },
-      ...messages,
-    ];
-
-    try {
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${groqKey}`,
-        },
-        body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          messages: groqMessages,
-          stream: true,
-          max_tokens: 8192,
-          temperature: 0.25,
-        }),
-      });
-
-      if (!res.ok) {
-        const errText = await res.text();
-        return new Response(JSON.stringify({ error: `Erro Groq: ${errText}` }), { status: 502 });
-      }
-
-      (async () => {
-        try {
-          const reader = res.body!.getReader();
-          const decoder = new TextDecoder();
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            const chunk = decoder.decode(value);
-            for (const line of chunk.split("\n").filter(l => l.startsWith("data: "))) {
-              const data = line.slice(6);
-              if (data === "[DONE]") continue;
-              try {
-                const parsed = JSON.parse(data);
-                const delta = parsed.choices?.[0]?.delta?.content ?? "";
-                if (delta) await writer.write(encoder.encode(delta));
-              } catch { /* skip */ }
-            }
-          }
-        } catch (e) {
-          const msg = e instanceof Error ? e.message : String(e);
-          await writer.write(encoder.encode(`\n\n⚠️ Erro: ${msg}`));
-        } finally {
-          await writer.close().catch(() => {});
-        }
-      })();
-
-      return new Response(readable, { headers });
-
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      return new Response(JSON.stringify({ error: msg }), { status: 500 });
-    }
+      },
+    });
+    return new Response(stream, { headers: streamHeaders });
   }
+
+  // ── Groq (fallback) ──────────────────────────────────────────────────────────
+  const stream = new ReadableStream({
+    async start(controller) {
+      const enc = new TextEncoder();
+      try {
+        const groqMessages = [
+          { role: "system", content: systemContent },
+          ...mensagens.map(m => ({ role: m.role, content: m.content })),
+        ];
+
+        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${groqKey}`,
+          },
+          body: JSON.stringify({
+            model: "llama-3.3-70b-versatile",
+            messages: groqMessages,
+            stream: true,
+            max_tokens: 8192,
+            temperature: 0.25,
+          }),
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          controller.enqueue(enc.encode(`⚠️ Erro Groq (${res.status}): ${errText}`));
+          controller.close();
+          return;
+        }
+
+        const reader = res.body!.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          for (const line of chunk.split("\n")) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith("data: ")) continue;
+            const data = trimmed.slice(6);
+            if (data === "[DONE]") continue;
+            try {
+              const parsed = JSON.parse(data);
+              const delta = parsed.choices?.[0]?.delta?.content;
+              if (delta) controller.enqueue(enc.encode(delta));
+            } catch { /* linha malformada */ }
+          }
+        }
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        controller.enqueue(enc.encode(`\n\n⚠️ Erro: ${msg}`));
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, { headers: streamHeaders });
 }
