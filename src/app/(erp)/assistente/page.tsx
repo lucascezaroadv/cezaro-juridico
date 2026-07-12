@@ -184,7 +184,7 @@ function renderMarkdown(text: string): string {
     .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>')
     .replace(/\*(.+?)\*/g, '<em class="italic text-gray-700">$1</em>')
     .replace(/^---$/gm, '<hr class="border-gray-200 my-4" />')
-    .replace(/^> (.+)$/gm, '<blockquote class="border-l-3 border-[#c9a84c] pl-3 italic text-gray-600 text-xs my-2">$1</blockquote>')
+    .replace(/^> (.+)$/gm, '<blockquote class="border-l-3 border-[#8B1A1A] pl-3 italic text-gray-600 text-xs my-2">$1</blockquote>')
     .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc text-sm leading-relaxed text-gray-700">$1</li>')
     .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-4 list-decimal text-sm leading-relaxed text-gray-700"><span class="font-semibold">$1.</span> $2</li>')
     .replace(/`(.+?)`/g, '<code class="bg-gray-100 text-xs px-1 py-0.5 rounded font-mono text-gray-800">$1</code>')
@@ -479,7 +479,7 @@ export default function AssistentePage() {
   // ─── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="-m-4 md:-m-6 flex overflow-hidden bg-[#f4f6f9]" style={{ height: "calc(100vh - 56px)" }}>
+    <div className="-m-4 md:-m-6 flex overflow-hidden bg-[#F8F6F4]" style={{ height: "calc(100vh - 56px)" }}>
 
       {/* ── Painel de contexto (desktop: lateral | mobile: overlay) ─────────── */}
       <aside className={`bg-white border-r border-gray-100 flex flex-col shrink-0 transition-all duration-300 z-20
@@ -489,8 +489,8 @@ export default function AssistentePage() {
       >
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-[#c9a84c]/10 flex items-center justify-center">
-              <BrainCircuit size={13} className="text-[#c9a84c]" />
+            <div className="w-6 h-6 bg-[#8B1A1A]/10 flex items-center justify-center">
+              <BrainCircuit size={13} className="text-[#8B1A1A]" />
             </div>
             <span className="text-xs font-bold text-gray-900">Contexto do Caso</span>
           </div>
@@ -512,7 +512,7 @@ export default function AssistentePage() {
                   title={m.desc}
                   className={`flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-[10px] font-semibold transition-colors text-left ${
                     contexto.modo === m.id
-                      ? "bg-[#060d1a] text-[#c9a84c]"
+                      ? "bg-[#8B1A1A] text-white"
                       : "bg-gray-50 text-gray-600 hover:bg-gray-100"
                   }`}
                 >
@@ -537,7 +537,7 @@ export default function AssistentePage() {
                   title={t.area}
                   className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium transition-colors ${
                     contexto.template === t.id
-                      ? "bg-[#c9a84c]/15 text-[#c9a84c] border border-[#c9a84c]/30"
+                      ? "bg-[#8B1A1A]/15 text-[#8B1A1A] border border-[#8B1A1A]/30"
                       : "bg-gray-50 text-gray-600 hover:bg-gray-100 border border-transparent"
                   }`}
                 >
@@ -570,7 +570,7 @@ export default function AssistentePage() {
               onClick={() => setSecaoContexto(tab.id as "basico" | "avancado" | "audio")}
               className={`flex-1 py-2 text-[10px] font-semibold transition-colors relative ${
                 secaoContexto === tab.id
-                  ? "text-[#c9a84c] border-b-2 border-[#c9a84c]"
+                  ? "text-[#8B1A1A] border-b-2 border-[#8B1A1A]"
                   : "text-gray-400 hover:text-gray-600"
               }`}
             >
@@ -590,7 +590,7 @@ export default function AssistentePage() {
                 <select
                   value={contexto.tipo}
                   onChange={e => setContexto(c => ({ ...c, tipo: e.target.value }))}
-                  className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#c9a84c] bg-white"
+                  className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#8B1A1A]/40 bg-white"
                 >
                   <option value="">Selecione...</option>
                   {TIPOS_PECA.map(t => (
@@ -608,7 +608,7 @@ export default function AssistentePage() {
                 <select
                   value={contexto.area}
                   onChange={e => setContexto(c => ({ ...c, area: e.target.value }))}
-                  className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#c9a84c] bg-white"
+                  className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#8B1A1A]/40 bg-white"
                 >
                   <option value="">Selecione...</option>
                   {AREAS.map(a => <option key={a} value={a}>{a}</option>)}
@@ -621,7 +621,7 @@ export default function AssistentePage() {
                   placeholder="Nome completo e qualificação"
                   value={contexto.polo_ativo}
                   onChange={e => setContexto(c => ({ ...c, polo_ativo: e.target.value }))}
-                  className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#c9a84c]"
+                  className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#8B1A1A]/40"
                 />
               </div>
 
@@ -631,7 +631,7 @@ export default function AssistentePage() {
                   placeholder="Nome completo e qualificação"
                   value={contexto.polo_passivo}
                   onChange={e => setContexto(c => ({ ...c, polo_passivo: e.target.value }))}
-                  className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#c9a84c]"
+                  className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#8B1A1A]/40"
                 />
               </div>
 
@@ -642,7 +642,7 @@ export default function AssistentePage() {
                   value={contexto.informacoes}
                   onChange={e => setContexto(c => ({ ...c, informacoes: e.target.value }))}
                   rows={8}
-                  className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#c9a84c] resize-none leading-relaxed"
+                  className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#8B1A1A]/40 resize-none leading-relaxed"
                 />
               </div>
             </>
@@ -652,35 +652,35 @@ export default function AssistentePage() {
             <>
               <div>
                 <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Nº do Processo</label>
-                <input value={contexto.numero_processo} onChange={e => setContexto(c => ({ ...c, numero_processo: e.target.value }))} placeholder="0000000-00.0000.0.00.0000" className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#c9a84c]" />
+                <input value={contexto.numero_processo} onChange={e => setContexto(c => ({ ...c, numero_processo: e.target.value }))} placeholder="0000000-00.0000.0.00.0000" className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#8B1A1A]/40" />
               </div>
               <div>
                 <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Vara / Juízo</label>
-                <input value={contexto.vara} onChange={e => setContexto(c => ({ ...c, vara: e.target.value }))} placeholder="Ex: 5ª Vara do Trabalho" className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#c9a84c]" />
+                <input value={contexto.vara} onChange={e => setContexto(c => ({ ...c, vara: e.target.value }))} placeholder="Ex: 5ª Vara do Trabalho" className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#8B1A1A]/40" />
               </div>
               <div>
                 <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Comarca / Cidade</label>
-                <input value={contexto.comarca} onChange={e => setContexto(c => ({ ...c, comarca: e.target.value }))} placeholder="Ex: São Paulo - SP" className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#c9a84c]" />
+                <input value={contexto.comarca} onChange={e => setContexto(c => ({ ...c, comarca: e.target.value }))} placeholder="Ex: São Paulo - SP" className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#8B1A1A]/40" />
               </div>
               <div>
                 <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Tribunal</label>
-                <input value={contexto.tribunal} onChange={e => setContexto(c => ({ ...c, tribunal: e.target.value }))} placeholder="Ex: TRT 1ª Região" className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#c9a84c]" />
+                <input value={contexto.tribunal} onChange={e => setContexto(c => ({ ...c, tribunal: e.target.value }))} placeholder="Ex: TRT 1ª Região" className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#8B1A1A]/40" />
               </div>
               <div>
                 <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Magistrado</label>
-                <input value={contexto.juiz} onChange={e => setContexto(c => ({ ...c, juiz: e.target.value }))} placeholder="Nome do juiz (opcional)" className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#c9a84c]" />
+                <input value={contexto.juiz} onChange={e => setContexto(c => ({ ...c, juiz: e.target.value }))} placeholder="Nome do juiz (opcional)" className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#8B1A1A]/40" />
               </div>
               <div>
                 <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Valor da Causa (R$)</label>
-                <input type="number" value={contexto.valorCausa} onChange={e => setContexto(c => ({ ...c, valorCausa: e.target.value }))} placeholder="0,00" className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#c9a84c]" />
+                <input type="number" value={contexto.valorCausa} onChange={e => setContexto(c => ({ ...c, valorCausa: e.target.value }))} placeholder="0,00" className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#8B1A1A]/40" />
               </div>
               <div>
                 <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Data dos Fatos</label>
-                <input type="date" value={contexto.dataFatos} onChange={e => setContexto(c => ({ ...c, dataFatos: e.target.value }))} className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#c9a84c]" />
+                <input type="date" value={contexto.dataFatos} onChange={e => setContexto(c => ({ ...c, dataFatos: e.target.value }))} className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#8B1A1A]/40" />
               </div>
               <div>
                 <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Prazo / Data-limite</label>
-                <input type="date" value={contexto.prazoResposta} onChange={e => setContexto(c => ({ ...c, prazoResposta: e.target.value }))} className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#c9a84c]" />
+                <input type="date" value={contexto.prazoResposta} onChange={e => setContexto(c => ({ ...c, prazoResposta: e.target.value }))} className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#8B1A1A]/40" />
               </div>
               <div>
                 <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Jurisprudência / Precedentes (cole aqui)</label>
@@ -689,7 +689,7 @@ export default function AssistentePage() {
                   value={contexto.jurisprudencia}
                   onChange={e => setContexto(c => ({ ...c, jurisprudencia: e.target.value }))}
                   rows={5}
-                  className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#c9a84c] resize-none leading-relaxed"
+                  className="w-full text-xs px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#8B1A1A]/40 resize-none leading-relaxed"
                 />
                 <p className="text-[9px] text-gray-400 mt-1">Apenas precedentes fornecidos aqui serão citados com exatidão.</p>
               </div>
@@ -703,12 +703,12 @@ export default function AssistentePage() {
               </div>
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-colors ${audioFile ? "border-[#c9a84c]/50 bg-[#c9a84c]/5" : "border-gray-200 hover:border-gray-300"}`}
+                className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-colors ${audioFile ? "border-[#8B1A1A]/50 bg-[#8B1A1A]/5" : "border-gray-200 hover:border-gray-300"}`}
               >
                 {audioFile ? (
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
-                      <FileAudio size={16} className="text-[#c9a84c] shrink-0" />
+                      <FileAudio size={16} className="text-[#8B1A1A] shrink-0" />
                       <span className="text-xs text-gray-700 truncate">{audioFile.name}</span>
                     </div>
                     <button onClick={e => { e.stopPropagation(); setAudioFile(null); setTranscricaoConcluida(false); }} className="text-gray-400 hover:text-red-500 shrink-0">
@@ -728,7 +728,7 @@ export default function AssistentePage() {
                 e.target.value = "";
               }} />
               {audioFile && !transcricaoConcluida && (
-                <button onClick={transcreverAudio} disabled={transcrevendo} className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#060d1a] text-white text-xs font-semibold rounded-xl hover:bg-[#0d1b2a] disabled:opacity-50 transition-colors">
+                <button onClick={transcreverAudio} disabled={transcrevendo} className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#8B1A1A] text-white text-xs font-semibold rounded-xl hover:bg-[#6B1010] disabled:opacity-50 transition-colors">
                   {transcrevendo ? <><Loader2 size={13} className="animate-spin" />Transcrevendo...</> : <><MicOff size={13} />Transcrever Áudio</>}
                 </button>
               )}
@@ -748,7 +748,7 @@ export default function AssistentePage() {
           <button
             onClick={gerarPeca}
             disabled={streaming || (!contexto.tipo && !contexto.informacoes && !contexto.template)}
-            className="w-full flex items-center justify-center gap-2 py-3 bg-[#c9a84c] hover:bg-[#d4b85a] text-[#060d1a] text-xs font-bold rounded-xl transition-colors disabled:opacity-40"
+            className="w-full flex items-center justify-center gap-2 py-3 bg-[#8B1A1A] hover:bg-[#d4b85a] text-[#8B1A1A] text-xs font-bold rounded-xl transition-colors disabled:opacity-40"
           >
             <Sparkles size={13} />
             {streaming ? "Gerando..." : `${modoAtual.label}`}
@@ -769,19 +769,19 @@ export default function AssistentePage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPainelAberto(v => !v)}
-              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#c9a84c] transition-colors"
+              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#8B1A1A] transition-colors"
               title="Contexto do caso"
             >
               {painelAberto ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
             </button>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-[#060d1a] flex items-center justify-center">
-                <Scale size={14} className="text-[#c9a84c]" />
+              <div className="w-8 h-8 rounded-full bg-[#8B1A1A] flex items-center justify-center">
+                <Scale size={14} className="text-white" />
               </div>
               <div className="hidden sm:block">
                 <p className="text-xs font-bold text-gray-900 leading-tight">Assistente Jurídico IA</p>
                 <div className="flex items-center gap-1.5">
-                  <ModoIcon size={9} className="text-[#c9a84c]" />
+                  <ModoIcon size={9} className="text-[#8B1A1A]" />
                   <p className="text-[10px] text-gray-400">{modoAtual.label} · {contexto.area || "Todas as áreas"}</p>
                 </div>
               </div>
@@ -790,7 +790,7 @@ export default function AssistentePage() {
           <div className="flex items-center gap-1">
             <button
               onClick={() => setHistoricoAberto(v => !v)}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg transition-colors ${historicoAberto ? "bg-[#c9a84c]/10 text-[#c9a84c]" : "text-gray-500 hover:bg-gray-100"}`}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg transition-colors ${historicoAberto ? "bg-[#8B1A1A]/10 text-[#8B1A1A]" : "text-gray-500 hover:bg-gray-100"}`}
             >
               <History size={13} />
               <span className="hidden sm:inline">Histórico</span>
@@ -822,7 +822,7 @@ export default function AssistentePage() {
                 <div
                   key={conv.id}
                   onClick={() => carregarConversa(conv)}
-                  className={`flex items-start gap-2 px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 group ${conversaAtualId === conv.id ? "bg-[#c9a84c]/5" : ""}`}
+                  className={`flex items-start gap-2 px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 group ${conversaAtualId === conv.id ? "bg-[#8B1A1A]/5" : ""}`}
                 >
                   <MessageSquare size={12} className="text-gray-400 mt-0.5 shrink-0" />
                   <div className="flex-1 min-w-0">
@@ -845,8 +845,8 @@ export default function AssistentePage() {
         <div className="flex-1 overflow-y-auto px-3 md:px-5 py-6 space-y-6">
           {mensagens.length === 0 && (
             <div className="max-w-2xl mx-auto text-center pt-8 md:pt-16 space-y-6 px-4">
-              <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-[#060d1a] flex items-center justify-center mx-auto">
-                <Scale size={24} className="text-[#c9a84c]" />
+              <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-[#8B1A1A] flex items-center justify-center mx-auto">
+                <Scale size={24} className="text-[#8B1A1A]" />
               </div>
               <div>
                 <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-2">Assistente Jurídico</h2>
@@ -859,7 +859,7 @@ export default function AssistentePage() {
                   <button
                     key={s}
                     onClick={() => enviar(s)}
-                    className="text-left px-4 py-3 bg-white border border-gray-200 rounded-xl text-xs text-gray-600 hover:border-[#c9a84c]/50 hover:bg-[#c9a84c]/5 transition-colors leading-relaxed"
+                    className="text-left px-4 py-3 bg-white border border-gray-200 rounded-xl text-xs text-gray-600 hover:border-[#8B1A1A]/50 hover:bg-[#8B1A1A]/5 transition-colors leading-relaxed"
                   >
                     {s}
                   </button>
@@ -873,11 +873,11 @@ export default function AssistentePage() {
 
           {mensagens.map(msg => (
             <div key={msg.id} className={`flex gap-2 md:gap-3 max-w-4xl ${msg.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto"}`}>
-              <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold ${msg.role === "user" ? "bg-[#3b82f6] text-white" : "bg-[#060d1a] text-[#c9a84c]"}`}>
+              <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold ${msg.role === "user" ? "bg-[#3b82f6] text-white" : "bg-[#8B1A1A] text-white"}`}>
                 {msg.role === "user" ? <User size={13} /> : <Scale size={13} />}
               </div>
               <div className={`flex-1 ${msg.role === "user" ? "max-w-[80%] md:max-w-[75%]" : ""}`}>
-                <div className={`rounded-2xl px-4 md:px-5 py-3 md:py-4 ${msg.role === "user" ? "bg-[#060d1a] text-white" : "bg-white border border-gray-100 shadow-sm"}`}>
+                <div className={`rounded-2xl px-4 md:px-5 py-3 md:py-4 ${msg.role === "user" ? "bg-[#8B1A1A] text-white" : "bg-white border border-gray-100 shadow-sm"}`}>
                   {msg.role === "user" ? (
                     <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                   ) : msg.content ? (
@@ -923,7 +923,7 @@ export default function AssistentePage() {
             <div className="flex gap-2 mb-2.5 overflow-x-auto pb-1">
               {suggestions.slice(0, 3).map(s => (
                 <button key={s} onClick={() => enviar(s)}
-                  className="shrink-0 text-[10px] px-3 py-1.5 bg-gray-100 hover:bg-[#c9a84c]/10 text-gray-600 rounded-full transition-colors whitespace-nowrap">
+                  className="shrink-0 text-[10px] px-3 py-1.5 bg-gray-100 hover:bg-[#8B1A1A]/10 text-gray-600 rounded-full transition-colors whitespace-nowrap">
                   {s}
                 </button>
               ))}
@@ -938,7 +938,7 @@ export default function AssistentePage() {
               placeholder="Peça uma revisão, ajuste o fundamento, inclua novos pedidos... (Enter para enviar)"
               rows={2}
               disabled={streaming}
-              className="flex-1 text-sm px-4 py-2.5 border border-gray-200 rounded-2xl focus:outline-none focus:border-[#c9a84c] focus:ring-2 focus:ring-[#c9a84c]/10 resize-none disabled:opacity-50 leading-relaxed"
+              className="flex-1 text-sm px-4 py-2.5 border border-gray-200 rounded-2xl focus:outline-none focus:border-[#8B1A1A]/40 focus:ring-2 focus:ring-[#8B1A1A]/10 resize-none disabled:opacity-50 leading-relaxed"
             />
             {streaming ? (
               <button onClick={pararGeracao} className="w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-red-50 border border-red-200 text-red-500 hover:bg-red-100 flex items-center justify-center transition-colors shrink-0" title="Parar">
@@ -946,7 +946,7 @@ export default function AssistentePage() {
               </button>
             ) : (
               <button onClick={() => enviar()} disabled={!input.trim()}
-                className="w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-[#060d1a] text-white flex items-center justify-center hover:bg-[#0d1b2a] disabled:opacity-30 transition-colors shrink-0">
+                className="w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-[#8B1A1A] text-white flex items-center justify-center hover:bg-[#6B1010] disabled:opacity-30 transition-colors shrink-0">
                 <Send size={15} />
               </button>
             )}

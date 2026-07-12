@@ -8,7 +8,7 @@ export default async function ErpLayout({ children }: { children: React.ReactNod
   if (!session) redirect("/login");
 
   return (
-    <div className="flex h-screen bg-[#f4f6f9] overflow-hidden">
+    <div className="flex h-screen bg-[#F8F6F4] overflow-hidden">
       <ErpSidebar />
       <div className="flex flex-col flex-1 overflow-hidden">
         <ErpHeader session={session} />

@@ -21,10 +21,11 @@ model Usuario {
   ativo     Boolean  @default(true)
   criadoEm DateTime @default(now())
 
-  processos   Processo[]
-  tarefas     Tarefa[]
-  leads       Lead[]
-  comentarios Comentario[]
+  processos    Processo[]
+  tarefas      Tarefa[]
+  leads        Lead[]
+  comentarios  Comentario[]
+  googleToken  GoogleToken?
 
   @@map("usuarios")
 }
@@ -181,6 +182,9 @@ model Intimacao {
   fonte          String?
   resumoIA       String?
   sugestaoIA     String?
+  // Integração Gmail
+  emailId        String?         @unique  // Gmail message ID — evita duplicatas
+  sistemaOrigem  String?                  // PJe, e-SAJ, EPROC, DJe, etc.
   criadoEm      DateTime        @default(now())
 
   processoId String?
@@ -189,6 +193,26 @@ model Intimacao {
   prazos     Prazo[]
 
   @@map("intimacoes")
+}
+
+// ─────────────────────────────────────────────
+// INTEGRAÇÃO GMAIL
+// ─────────────────────────────────────────────
+
+model GoogleToken {
+  id           String    @id @default(cuid())
+  usuarioId    String    @unique
+  usuario      Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  accessToken  String
+  refreshToken String?
+  expiresAt    DateTime
+  googleEmail  String?   // qual conta Google foi conectada
+  ultimaSync   DateTime?
+  totalImportado Int     @default(0)
+  criadoEm    DateTime  @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@map("google_tokens")
 }
 
 enum NivelUrgencia {

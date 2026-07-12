@@ -117,12 +117,12 @@ const depoimentos = [
 
 export default function HomePage() {
   return (
-    <div className="font-[family-name:var(--font-lato)] bg-white">
+    <div className="font-[family-name:var(--font-lato)] bg-[#120808]">
 
       {/* ── HERO ──────────────────────────────────── */}
       <section className="relative min-h-screen flex items-center bg-[#8B1A1A] overflow-hidden">
 
-        {/* Marca d'água — balança grande, pura imagem sem texto */}
+        {/* Marca d'água — balança grande */}
         <div className="absolute inset-0 flex items-center justify-end pointer-events-none select-none">
           <div
             className="relative"
@@ -159,14 +159,12 @@ export default function HomePage() {
         <div className="absolute top-[88px] left-0 right-0 z-10 pointer-events-none">
           <div className="max-w-7xl mx-auto px-6 md:px-12">
             <div className="flex items-center gap-4">
-              {/* Mini balança inline */}
               <div
                 className="relative shrink-0"
                 style={{ width: 28, height: 28, filter: "brightness(0) invert(1)", opacity: 0.65 }}
               >
                 <Image src="/logo-balanca.png" alt="" fill quality={100} style={{ objectFit: "contain" }} />
               </div>
-              {/* Nome */}
               <div
                 style={{
                   fontFamily: "'Cormorant Garamond', Georgia, serif",
@@ -275,24 +273,23 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Gradiente bottom fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white/[0.06] to-transparent" />
+        {/* Wave para o escuro */}
         <div className="absolute bottom-0 left-0 right-0">
           <svg viewBox="0 0 1440 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full block">
-            <path d="M0 48 L0 24 Q360 0 720 24 Q1080 48 1440 24 L1440 48 Z" fill="white" />
+            <path d="M0 48 L0 24 Q360 0 720 24 Q1080 48 1440 24 L1440 48 Z" fill="#120808" />
           </svg>
         </div>
       </section>
 
       {/* ── SOBRE ─────────────────────────────────── */}
-      <section className="py-32 bg-white">
+      <section className="py-32 bg-[#120808]">
         <div className="max-w-7xl mx-auto px-6 md:px-12 grid md:grid-cols-2 gap-20 items-center">
           <div>
             <p className="text-[#8B1A1A] text-[9px] tracking-[0.4em] uppercase font-bold mb-5">
               O Escritório
             </p>
             <h2
-              className="text-[#1A0A0A] font-bold leading-tight mb-6"
+              className="text-white font-bold leading-tight mb-6"
               style={{
                 fontFamily: "'Cormorant Garamond', Georgia, serif",
                 fontSize: "clamp(2rem, 4vw, 3.2rem)",
@@ -304,12 +301,12 @@ export default function HomePage() {
               <div className="h-[1px] w-8 bg-[#8B1A1A]" />
               <div className="w-1 h-1 bg-[#8B1A1A]/50 rotate-45" />
             </div>
-            <p className="text-[#3D2020]/60 leading-[1.9] mb-5 text-[0.95rem]">
+            <p className="text-white/45 leading-[1.9] mb-5 text-[0.95rem]">
               O Cezaro Costa Advocacia é um escritório fundado sobre os pilares da excelência técnica,
               da ética profissional e da inovação jurídica. Atuamos com equipe altamente especializada,
               orientada pela construção de soluções que protegem e impulsionam nossos clientes.
             </p>
-            <p className="text-[#3D2020]/60 leading-[1.9] mb-12 text-[0.95rem]">
+            <p className="text-white/45 leading-[1.9] mb-12 text-[0.95rem]">
               Nossa abordagem une o rigor do Direito à inteligência estratégica, garantindo que cada
               caso seja tratado com a atenção personalizada que merece — seja uma empresa ou um indivíduo.
             </p>
@@ -323,7 +320,6 @@ export default function HomePage() {
 
           {/* Card vermelho com balança como marca d'água */}
           <div className="bg-[#8B1A1A] p-12 relative overflow-hidden">
-            {/* Marca d'água — só a balança, grande */}
             <div
               className="absolute -right-12 -bottom-12 pointer-events-none select-none"
               style={{ width: 260, height: 260, opacity: 0.08, filter: "brightness(0) invert(1)" }}
@@ -369,46 +365,46 @@ export default function HomePage() {
       </section>
 
       {/* ── ÁREAS DE ATUAÇÃO ─────────────────────── */}
-      <section className="py-32 bg-[#F8F6F4]">
+      <section className="py-32 bg-[#0E0505]">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           <div className="text-center mb-20">
             <p className="text-[#8B1A1A] text-[9px] tracking-[0.4em] uppercase font-bold mb-5">
               Especialidades
             </p>
             <h2
-              className="text-[#1A0A0A] font-bold"
+              className="text-white font-bold"
               style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(2rem, 4vw, 3rem)" }}
             >
               Áreas de Atuação
             </h2>
             <div className="flex items-center justify-center gap-3 mt-6">
-              <div className="h-[1px] w-8 bg-[#8B1A1A]/40" />
-              <div className="w-1 h-1 bg-[#8B1A1A]/40 rotate-45" />
-              <div className="h-[1px] w-8 bg-[#8B1A1A]/40" />
+              <div className="h-[1px] w-8 bg-[#8B1A1A]/50" />
+              <div className="w-1 h-1 bg-[#8B1A1A]/50 rotate-45" />
+              <div className="h-[1px] w-8 bg-[#8B1A1A]/50" />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1px] bg-[#E8E4E0]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1px] bg-white/6">
             {areas.map((area, i) => {
               const Icon = area.icon;
               return (
                 <Link
                   key={area.slug}
                   href={`/areas-de-atuacao/${area.slug}`}
-                  className={`group bg-white hover:bg-[#8B1A1A] p-9 transition-all duration-400 flex flex-col${
+                  className={`group bg-[#0E0505] hover:bg-[#8B1A1A] p-9 transition-all duration-400 flex flex-col${
                     i === areas.length - 1 && areas.length % 3 !== 0 ? " lg:col-start-2" : ""
                   }`}
                 >
-                  <div className="w-10 h-10 border border-[#8B1A1A]/20 group-hover:border-white/30 flex items-center justify-center mb-7 transition-colors">
+                  <div className="w-10 h-10 border border-white/10 group-hover:border-white/30 flex items-center justify-center mb-7 transition-colors">
                     <Icon className="w-4 h-4 text-[#8B1A1A] group-hover:text-white transition-colors" />
                   </div>
                   <h3
-                    className="text-[#1A0A0A] group-hover:text-white text-[1.2rem] font-semibold mb-3 transition-colors"
+                    className="text-white/85 group-hover:text-white text-[1.2rem] font-semibold mb-3 transition-colors"
                     style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
                   >
                     {area.title}
                   </h3>
-                  <p className="text-[#3D2020]/55 group-hover:text-white/65 text-[0.83rem] leading-relaxed mb-7 flex-1 transition-colors">{area.desc}</p>
+                  <p className="text-white/35 group-hover:text-white/65 text-[0.83rem] leading-relaxed mb-7 flex-1 transition-colors">{area.desc}</p>
                   <span className="inline-flex items-center gap-2 text-[#8B1A1A] group-hover:text-white/80 text-[0.72rem] font-bold tracking-[0.15em] uppercase transition-all">
                     Saiba mais <ArrowRight size={11} />
                   </span>
@@ -481,11 +477,11 @@ export default function HomePage() {
       </section>
 
       {/* ── NÚMEROS ───────────────────────────────── */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-[#120808]">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100">
-            {indicadores.map((ind, i) => (
-              <div key={ind.label} className={`text-center px-8 py-6 ${i === 0 ? "" : ""}`}>
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-white/6">
+            {indicadores.map((ind) => (
+              <div key={ind.label} className="text-center px-8 py-6">
                 <div
                   className="text-[#8B1A1A] font-bold leading-none mb-3"
                   style={{
@@ -495,8 +491,8 @@ export default function HomePage() {
                 >
                   {ind.valor}
                 </div>
-                <div className="w-6 h-[1px] bg-[#8B1A1A]/25 mx-auto mb-3" />
-                <div className="text-[#3D2020]/50 text-[0.72rem] tracking-[0.15em] uppercase">{ind.label}</div>
+                <div className="w-6 h-[1px] bg-[#8B1A1A]/30 mx-auto mb-3" />
+                <div className="text-white/35 text-[0.72rem] tracking-[0.15em] uppercase">{ind.label}</div>
               </div>
             ))}
           </div>
@@ -504,22 +500,22 @@ export default function HomePage() {
       </section>
 
       {/* ── DEPOIMENTOS ──────────────────────────── */}
-      <section className="py-32 bg-[#F8F6F4]">
+      <section className="py-32 bg-[#0E0505]">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           <div className="text-center mb-20">
             <p className="text-[#8B1A1A] text-[9px] tracking-[0.4em] uppercase font-bold mb-5">
               Depoimentos
             </p>
             <h2
-              className="text-[#1A0A0A] font-bold"
+              className="text-white font-bold"
               style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(2rem, 4vw, 3rem)" }}
             >
               O que dizem nossos clientes
             </h2>
             <div className="flex items-center justify-center gap-3 mt-6">
-              <div className="h-[1px] w-8 bg-[#8B1A1A]/40" />
-              <div className="w-1 h-1 bg-[#8B1A1A]/40 rotate-45" />
-              <div className="h-[1px] w-8 bg-[#8B1A1A]/40" />
+              <div className="h-[1px] w-8 bg-[#8B1A1A]/50" />
+              <div className="w-1 h-1 bg-[#8B1A1A]/50 rotate-45" />
+              <div className="h-[1px] w-8 bg-[#8B1A1A]/50" />
             </div>
           </div>
 
@@ -527,7 +523,7 @@ export default function HomePage() {
             {depoimentos.map((d, i) => (
               <div
                 key={i}
-                className="bg-white border border-gray-100 hover:border-[#8B1A1A]/15 hover:shadow-lg p-10 transition-all duration-400 flex flex-col"
+                className="bg-[#120808] border border-white/6 hover:border-[#8B1A1A]/30 hover:shadow-xl p-10 transition-all duration-400 flex flex-col"
               >
                 <div className="flex gap-0.5 mb-7">
                   {[...Array(5)].map((_, si) => (
@@ -535,19 +531,19 @@ export default function HomePage() {
                   ))}
                 </div>
                 <div
-                  className="text-[#8B1A1A]/12 leading-none mb-2 -ml-1"
+                  className="text-[#8B1A1A]/20 leading-none mb-2 -ml-1"
                   style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "5rem" }}
                 >
                   "
                 </div>
-                <p className="text-[#3D2020]/65 text-[0.88rem] leading-[1.9] mb-8 -mt-3 flex-1">{d.texto}</p>
-                <div className="flex items-center gap-4 pt-6 border-t border-gray-100">
+                <p className="text-white/50 text-[0.88rem] leading-[1.9] mb-8 -mt-3 flex-1">{d.texto}</p>
+                <div className="flex items-center gap-4 pt-6 border-t border-white/8">
                   <div className="w-9 h-9 bg-[#8B1A1A] flex items-center justify-center shrink-0">
                     <span className="text-white text-sm font-bold">{d.autor[0]}</span>
                   </div>
                   <div>
-                    <div className="text-[#1A0A0A] text-[0.85rem] font-bold tracking-wide">{d.autor}</div>
-                    <div className="text-[#3D2020]/40 text-[0.72rem] mt-0.5">{d.cargo}</div>
+                    <div className="text-white text-[0.85rem] font-bold tracking-wide">{d.autor}</div>
+                    <div className="text-white/35 text-[0.72rem] mt-0.5">{d.cargo}</div>
                   </div>
                 </div>
               </div>
@@ -558,14 +554,12 @@ export default function HomePage() {
 
       {/* ── CTA FINAL ────────────────────────────── */}
       <section className="py-32 bg-[#8B1A1A] relative overflow-hidden">
-        {/* Marca d'água direita */}
         <div
           className="absolute right-[-60px] top-1/2 -translate-y-1/2 pointer-events-none select-none"
           style={{ width: 480, height: 480, opacity: 0.06, filter: "brightness(0) invert(1)" }}
         >
           <Image src="/logo-balanca.png" alt="" fill quality={100} style={{ objectFit: "contain" }} />
         </div>
-        {/* Marca d'água esquerda menor */}
         <div
           className="absolute left-[-60px] bottom-[-60px] pointer-events-none select-none"
           style={{ width: 280, height: 280, opacity: 0.04, filter: "brightness(0) invert(1)" }}
@@ -626,7 +620,7 @@ export default function HomePage() {
       </section>
 
       {/* ── BLOG PREVIEW ─────────────────────────── */}
-      <section className="py-28 bg-white border-t border-gray-100">
+      <section className="py-28 bg-[#120808] border-t border-white/5">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           <div className="flex items-end justify-between mb-16">
             <div>
@@ -634,7 +628,7 @@ export default function HomePage() {
                 Conhecimento
               </p>
               <h2
-                className="text-[#1A0A0A] font-bold"
+                className="text-white font-bold"
                 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(1.8rem, 3vw, 2.4rem)" }}
               >
                 Blog Jurídico
@@ -648,7 +642,7 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-[1px] bg-gray-100">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-[1px] bg-white/5">
             {[
               {
                 tag: "LGPD",
@@ -669,20 +663,20 @@ export default function HomePage() {
               <Link
                 key={art.title}
                 href="/blog"
-                className="group bg-white hover:bg-[#F8F6F4] p-9 transition-all duration-300 flex flex-col"
+                className="group bg-[#120808] hover:bg-[#1A0C0C] p-9 transition-all duration-300 flex flex-col"
               >
                 <span className="text-[#8B1A1A] text-[9px] tracking-[0.3em] uppercase mb-5 font-bold">
                   {art.tag}
                 </span>
                 <h3
-                  className="text-[#1A0A0A] group-hover:text-[#8B1A1A] text-[1.15rem] font-semibold leading-snug mb-6 flex-1 transition-colors"
+                  className="text-white/80 group-hover:text-white text-[1.15rem] font-semibold leading-snug mb-6 flex-1 transition-colors"
                   style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
                 >
                   {art.title}
                 </h3>
-                <div className="flex items-center justify-between pt-6 border-t border-gray-100">
-                  <span className="text-[#3D2020]/35 text-[0.72rem] tracking-wide">{art.data}</span>
-                  <ArrowRight size={13} className="text-gray-200 group-hover:text-[#8B1A1A] group-hover:translate-x-1 transition-all" />
+                <div className="flex items-center justify-between pt-6 border-t border-white/8">
+                  <span className="text-white/25 text-[0.72rem] tracking-wide">{art.data}</span>
+                  <ArrowRight size={13} className="text-white/10 group-hover:text-[#8B1A1A] group-hover:translate-x-1 transition-all" />
                 </div>
               </Link>
             ))}

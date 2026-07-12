@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import Image from "next/image";
 import {
   LayoutDashboard, FolderOpen, Users, Bell, CalendarDays,
-  Megaphone, Zap, DollarSign, FileArchive, Settings, Scale,
+  Megaphone, Zap, DollarSign, FileArchive, Settings,
   ChevronRight, BrainCircuit, Menu, X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -44,31 +45,77 @@ const navGroups = [
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
+
   return (
     <div className="flex flex-col h-full">
+
       {/* Logo */}
-      <div className="px-5 py-5 border-b border-white/5 flex items-center justify-between">
-        <Link href="/dashboard" className="flex items-center gap-2.5" onClick={onClose}>
-          <div className="w-8 h-8 rounded-lg bg-[#c9a84c]/10 border border-[#c9a84c]/30 flex items-center justify-center">
-            <Scale size={15} className="text-[#c9a84c]" />
+      <div className="px-5 pt-6 pb-5 border-b border-[#8B1A1A]/20 flex items-center justify-between">
+        <Link href="/dashboard" className="flex items-center gap-3" onClick={onClose}>
+          {/* Balança miniatura com filtro vermelho */}
+          <div className="relative shrink-0" style={{ width: 34, height: 34 }}>
+            <Image
+              src="/logo-balanca.png"
+              alt="Cezaro Costa"
+              fill
+              quality={100}
+              style={{
+                objectFit: "contain",
+                filter: "brightness(0) saturate(100%) invert(14%) sepia(72%) saturate(800%) hue-rotate(330deg) brightness(0.85)",
+              }}
+            />
           </div>
           <div>
-            <div className="text-white text-xs font-bold tracking-wide">CEZARO COSTA</div>
-            <div className="text-white/30 text-[9px] tracking-widest uppercase">Sistema Jurídico</div>
+            <div
+              style={{
+                fontFamily: "'Cormorant Garamond', Georgia, serif",
+                fontSize: "0.88rem",
+                fontWeight: 600,
+                letterSpacing: "0.1em",
+                color: "#1A0A0A",
+                textTransform: "uppercase",
+                lineHeight: 1.1,
+              }}
+            >
+              Cezaro Costa
+            </div>
+            <div
+              style={{
+                fontSize: "0.6rem",
+                letterSpacing: "0.18em",
+                color: "#8B1A1A",
+                textTransform: "uppercase",
+                marginTop: 3,
+                fontFamily: "var(--font-lato, system-ui)",
+              }}
+            >
+              Sistema Jurídico
+            </div>
           </div>
         </Link>
         {onClose && (
-          <button onClick={onClose} className="text-white/40 hover:text-white/80 transition-colors p-1">
-            <X size={18} />
+          <button onClick={onClose} className="text-gray-400 hover:text-[#8B1A1A] transition-colors p-1">
+            <X size={17} />
           </button>
         )}
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-5">
+      <nav className="flex-1 overflow-y-auto py-5 px-3 space-y-5">
         {navGroups.map((group) => (
           <div key={group.label}>
-            <p className="text-white/25 text-[9px] tracking-[0.2em] uppercase font-bold px-2 mb-2">
+            <p
+              className="px-3 mb-2"
+              style={{
+                fontSize: "0.6rem",
+                letterSpacing: "0.25em",
+                textTransform: "uppercase",
+                fontWeight: 700,
+                color: "#8B1A1A",
+                opacity: 0.6,
+                fontFamily: "var(--font-lato, system-ui)",
+              }}
+            >
               {group.label}
             </p>
             <ul className="space-y-0.5">
@@ -81,15 +128,19 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
                       href={item.href}
                       onClick={onClose}
                       className={cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 group",
+                        "flex items-center gap-3 px-3 py-2.5 text-sm transition-all duration-150 group",
                         active
-                          ? "bg-[#c9a84c]/15 text-[#c9a84c]"
-                          : "text-white/50 hover:text-white/90 hover:bg-white/5"
+                          ? "bg-[#8B1A1A] text-white"
+                          : "text-[#3D2020]/60 hover:text-[#8B1A1A] hover:bg-[#8B1A1A]/6"
                       )}
+                      style={{ fontFamily: "var(--font-lato, system-ui)" }}
                     >
-                      <Icon size={16} className={active ? "text-[#c9a84c]" : ""} />
-                      <span className="flex-1 font-medium">{item.label}</span>
-                      {active && <ChevronRight size={12} className="text-[#c9a84c]/60" />}
+                      <Icon
+                        size={15}
+                        className={active ? "text-white/90" : "text-[#8B1A1A]/50 group-hover:text-[#8B1A1A]"}
+                      />
+                      <span className="flex-1 font-medium tracking-wide">{item.label}</span>
+                      {active && <ChevronRight size={11} className="text-white/50" />}
                     </Link>
                   </li>
                 );
@@ -99,14 +150,28 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
         ))}
       </nav>
 
+      {/* Marca d'água decorativa */}
+      <div
+        className="mx-auto mb-2 pointer-events-none select-none"
+        style={{
+          width: 80, height: 80,
+          opacity: 0.04,
+          filter: "brightness(0) saturate(100%) invert(14%) sepia(72%) saturate(800%) hue-rotate(330deg) brightness(0.85)",
+          position: "relative",
+        }}
+      >
+        <Image src="/logo-balanca.png" alt="" fill quality={100} style={{ objectFit: "contain" }} />
+      </div>
+
       {/* Settings */}
-      <div className="px-3 py-3 border-t border-white/5">
+      <div className="px-3 pb-4 border-t border-gray-100 pt-3">
         <Link
           href="/configuracoes"
           onClick={onClose}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/40 hover:text-white/70 hover:bg-white/5 transition-all"
+          className="flex items-center gap-3 px-3 py-2.5 text-sm text-[#3D2020]/45 hover:text-[#8B1A1A] hover:bg-[#8B1A1A]/6 transition-all"
+          style={{ fontFamily: "var(--font-lato, system-ui)" }}
         >
-          <Settings size={16} />
+          <Settings size={15} />
           Configurações
         </Link>
       </div>
@@ -120,30 +185,28 @@ export default function ErpSidebar() {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-60 bg-[#060d1a] flex-col h-full shrink-0">
+      <aside className="hidden md:flex w-60 bg-white border-r border-gray-100 flex-col h-full shrink-0">
         <SidebarContent />
       </aside>
 
-      {/* Mobile: hamburger trigger (rendered inside header via portal-less approach — exposed via data attr) */}
+      {/* Mobile trigger */}
       <button
         id="sidebar-mobile-trigger"
         onClick={() => setMobileOpen(true)}
-        className="md:hidden fixed top-3.5 left-4 z-50 p-2 bg-[#060d1a] text-white rounded-lg shadow-md"
+        className="md:hidden fixed top-3.5 left-4 z-50 p-2 bg-[#8B1A1A] text-white shadow-md"
         aria-label="Abrir menu"
       >
-        <Menu size={20} />
+        <Menu size={18} />
       </button>
 
       {/* Mobile overlay */}
       {mobileOpen && (
         <div className="md:hidden fixed inset-0 z-50 flex">
-          {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-[#1A0A0A]/50 backdrop-blur-sm"
             onClick={() => setMobileOpen(false)}
           />
-          {/* Drawer */}
-          <aside className="relative w-72 max-w-[85vw] bg-[#060d1a] flex flex-col h-full shadow-2xl">
+          <aside className="relative w-72 max-w-[85vw] bg-white flex flex-col h-full shadow-2xl">
             <SidebarContent onClose={() => setMobileOpen(false)} />
           </aside>
         </div>
