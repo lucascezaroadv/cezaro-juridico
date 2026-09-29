@@ -22,16 +22,25 @@ export async function GET(request: NextRequest) {
 
   const now = new Date();
 
+  // upcoming: inclui tanto os próximos N dias quanto os vencidos pendentes
+  const upcomingWhere = upcoming
+    ? {
+        OR: [
+          // Vencimentos nos próximos N dias
+          { dataVencimento: { gte: now, lte: new Date(now.getTime() + Number(upcoming) * 86400000) } },
+          // Vencidos ainda pendentes (para aparecerem no alerta)
+          ...(status === "PENDENTE" || !status
+            ? [{ dataVencimento: { lt: now }, status: "PENDENTE" as never }]
+            : []),
+        ],
+      }
+    : {};
+
   const prazos = await prisma.prazo.findMany({
     where: {
-      ...(status ? { status: status as never } : {}),
+      ...(status && !upcoming ? { status: status as never } : {}),
       ...(processoId ? { processoId } : {}),
-      ...(upcoming ? {
-        dataVencimento: {
-          gte: now,
-          lte: new Date(now.getTime() + Number(upcoming) * 86400000),
-        }
-      } : {}),
+      ...upcomingWhere,
     },
     include: {
       processo: { select: { id: true, numero: true, areaJuridica: true } },

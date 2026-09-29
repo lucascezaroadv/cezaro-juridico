@@ -522,16 +522,22 @@ export default function IntimacoesPage() {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {gmailConectado ? (
-            <button
-              onClick={sincronizarGmail}
-              disabled={sincronizando}
-              className="inline-flex items-center gap-2 px-3 py-2 border border-[#8B1A1A]/30 text-[#8B1A1A] hover:bg-[#8B1A1A]/5 text-xs font-medium transition-colors disabled:opacity-60"
-              title={ultimoSync ? `Última sync: ${new Date(ultimoSync).toLocaleString("pt-BR")}` : "Sincronizar Gmail"}
-            >
-              <Mail size={14} className={sincronizando ? "animate-pulse" : ""} />
-              {sincronizando ? "Sincronizando..." : "Sincronizar Gmail"}
-              {ultimoSync && !sincronizando && <CheckCircle size={12} className="text-green-500" />}
-            </button>
+            <div className="flex flex-col items-end gap-0.5">
+              <button
+                onClick={sincronizarGmail}
+                disabled={sincronizando}
+                className="inline-flex items-center gap-2 px-3 py-2 border border-[#8B1A1A]/30 text-[#8B1A1A] hover:bg-[#8B1A1A]/5 text-xs font-medium transition-colors disabled:opacity-60"
+              >
+                <Mail size={14} className={sincronizando ? "animate-pulse" : ""} />
+                {sincronizando ? "Sincronizando..." : "Sincronizar agora"}
+                {ultimoSync && !sincronizando && <CheckCircle size={12} className="text-green-500" />}
+              </button>
+              <span className="text-[10px] text-gray-400">
+                {ultimoSync
+                  ? `Última sync: ${new Date(ultimoSync).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}`
+                  : "Auto-sync ativo a cada 6h"}
+              </span>
+            </div>
           ) : (
             <Link
               href="/configuracoes"
