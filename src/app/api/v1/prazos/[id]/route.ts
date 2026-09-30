@@ -9,26 +9,33 @@ const patchSchema = z.object({
   descricao: z.string().optional(),
   dataVencimento: z.string().optional(),
   tipo: z.enum(["PROCESSUAL", "ADMINISTRATIVO", "CONTRATUAL", "INTERNO"]).optional(),
+  processoId: z.string().optional(),
 });
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { error } = await apiAuth();
   if (error) return error;
 
+  const { id } = await params;
   const body = await request.json();
   const parsed = patchSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Dados inválidos" }, { status: 422 });
 
-  const { dataVencimento, ...rest } = parsed.data;
+  const { dataVencimento, processoId, ...rest } = parsed.data;
 
   const prazo = await prisma.prazo.update({
-    where: { id: params.id },
+    where: { id },
     data: {
       ...rest,
       ...(dataVencimento ? { dataVencimento: new Date(dataVencimento) } : {}),
+      ...(processoId !== undefined
+        ? processoId
+          ? { processo: { connect: { id: processoId } } }
+          : { processo: { disconnect: true } }
+        : {}),
     },
   });
 
@@ -37,11 +44,12 @@ export async function PATCH(
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { error } = await apiAuth();
   if (error) return error;
 
-  await prisma.prazo.delete({ where: { id: params.id } });
+  const { id } = await params;
+  await prisma.prazo.delete({ where: { id } });
   return NextResponse.json({ ok: true });
 }
