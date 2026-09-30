@@ -40,6 +40,37 @@ async function obterAccessToken(usuarioId: string): Promise<string | null> {
   return dados.access_token;
 }
 
+// ─── Helpers de prazo automático ─────────────────────────────────────────────
+
+function adicionarDiasUteis(inicio: Date, dias: number): Date {
+  const d = new Date(inicio);
+  let adicionados = 0;
+  while (adicionados < dias) {
+    d.setDate(d.getDate() + 1);
+    const dow = d.getDay();
+    if (dow !== 0 && dow !== 6) adicionados++; // pula sábado e domingo
+  }
+  return d;
+}
+
+function detectarDataAudiencia(texto: string): Date | null {
+  // Padrões: "audiência designada para DD/MM/YYYY", "audiência em DD/MM/YYYY"
+  const patterns = [
+    /audi[eê]ncia\s+(?:designada\s+para|marcada\s+para|em|no\s+dia)\s+(\d{2})\/(\d{2})\/(\d{4})/i,
+    /(?:data|dia)\s+da\s+audi[eê]ncia[:\s]+(\d{2})\/(\d{2})\/(\d{4})/i,
+    /audi[eê]ncia[^.]{0,60}(\d{2})\/(\d{2})\/(\d{4})/i,
+  ];
+  for (const re of patterns) {
+    const m = texto.match(re);
+    if (m) {
+      const [, d, mo, y] = m;
+      const dt = new Date(Number(y), Number(mo) - 1, Number(d));
+      if (!isNaN(dt.getTime())) return dt;
+    }
+  }
+  return null;
+}
+
 // ─── Gmail API helpers ────────────────────────────────────────────────────────
 
 type GmailMessage = { id: string; threadId: string };
@@ -365,7 +396,7 @@ export async function POST() {
       processoId = proc?.id;
     }
 
-    await prisma.intimacao.create({
+    const novaIntimacao = await prisma.intimacao.create({
       data: {
         titulo:        dados.titulo,
         conteudo:      dados.conteudo,
@@ -380,6 +411,43 @@ export async function POST() {
       },
     });
     importadas++;
+
+    // Auto-prazo de consulta: 5 dias úteis a partir de hoje, sem duplicar
+    const prazoExiste = await prisma.prazo.findFirst({
+      where: { intimacaoId: novaIntimacao.id },
+    });
+    if (!prazoExiste) {
+      const dataConsulta = adicionarDiasUteis(new Date(), 5);
+
+      // Detectar audiência no texto
+      const dataAudiencia = detectarDataAudiencia(corpo + " " + assunto);
+
+      if (dataAudiencia && dataAudiencia > new Date()) {
+        await prisma.prazo.create({
+          data: {
+            titulo:        `Audiência: ${dados.titulo.slice(0, 80)}`,
+            descricao:     `Audiência detectada automaticamente via e-mail de ${dados.sistema}.`,
+            dataVencimento: dataAudiencia,
+            tipo:          "PROCESSUAL",
+            status:        "PENDENTE",
+            intimacaoId:   novaIntimacao.id,
+            processoId,
+          },
+        });
+      }
+
+      await prisma.prazo.create({
+        data: {
+          titulo:        `Consulta: ${dados.titulo.slice(0, 80)}`,
+          descricao:     `Prazo automático gerado a partir de intimação recebida via ${dados.sistema}. Verifique o prazo fatal e ajuste se necessário.`,
+          dataVencimento: dataConsulta,
+          tipo:          "PROCESSUAL",
+          status:        "PENDENTE",
+          intimacaoId:   novaIntimacao.id,
+          processoId,
+        },
+      });
+    }
   }
 
   await prisma.googleToken.update({
