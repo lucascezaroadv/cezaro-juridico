@@ -13,6 +13,21 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       movimentacoes: { orderBy: { data: "desc" }, take: 20 },
       documentos: { orderBy: { criadoEm: "desc" } },
       prazos: { where: { status: "PENDENTE" }, orderBy: { dataVencimento: "asc" }, take: 5 },
+      intimacoes: {
+        orderBy: { dataPublicacao: "desc" },
+        take: 30,
+        select: {
+          id: true,
+          titulo: true,
+          conteudo: true,
+          dataPublicacao: true,
+          prazo: true,
+          urgencia: true,
+          status: true,
+          fonte: true,
+          sistemaOrigem: true,
+        },
+      },
     },
   });
 
